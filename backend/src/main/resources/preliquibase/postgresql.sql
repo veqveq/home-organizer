@@ -1,0 +1,1 @@
+CREATE SCHEMA IF NOT EXISTS ${spring.jpa.properties.hibernate.default_schema};
