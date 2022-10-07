@@ -2,6 +2,7 @@ package ru.veqveq.backend.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
@@ -15,6 +16,7 @@ import ru.veqveq.backend.service.DictionaryItemService;
 
 import java.util.UUID;
 
+@Tag(name = "Контроллер значений справочников")
 @RestController
 @RequestMapping("/api/v1/items")
 @RequiredArgsConstructor

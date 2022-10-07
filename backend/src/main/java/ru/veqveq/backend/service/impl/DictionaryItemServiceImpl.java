@@ -1,6 +1,7 @@
 package ru.veqveq.backend.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -33,6 +34,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class DictionaryItemServiceImpl implements DictionaryItemService {
     private final ElasticsearchOperations operations;
+    private final RestHighLevelClient client;
     private final DictionaryItemRepo repo;
     private final DictionaryItemMapper mapper;
 
@@ -84,7 +86,7 @@ public class DictionaryItemServiceImpl implements DictionaryItemService {
     @Override
     public DictionaryItemDto update(UUID uuid, DictionaryItemDto dto) {
         if (Objects.isNull(uuid)) {
-            throw new HOException("Не найден идентификатор записи");
+            throw new HOException("Не получен идентификатор записи");
         }
         DictionaryItem item = repo.findById(uuid.toString())
                 .orElseThrow(() -> new HOException(String.format("Запись с идентификатором %s не найдена", uuid)));
@@ -95,7 +97,7 @@ public class DictionaryItemServiceImpl implements DictionaryItemService {
     @Override
     public void delete(UUID uuid) {
         if (Objects.isNull(uuid)) {
-            throw new HOException("Не найден идентификатор записи");
+            throw new HOException("Не получен идентификатор записи");
         }
         if (repo.existsById(uuid.toString())) {
             repo.deleteById(uuid.toString());
