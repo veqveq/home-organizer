@@ -6,16 +6,25 @@ import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.core.CountRequest;
+import org.elasticsearch.client.core.CountResponse;
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.CreateIndexResponse;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.springframework.stereotype.Service;
+import ru.veqveq.backend.dto.DictionaryItemDto;
 import ru.veqveq.backend.exception.HOException;
 import ru.veqveq.backend.model.entity.Dictionary;
 import ru.veqveq.backend.model.entity.DictionaryField;
 
 import java.io.IOException;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -67,6 +76,45 @@ public class ElasticsearchService {
             log.error("ES index delete error: {}", e.getMessage());
             throw new HOException(String.format("Не удалось удалить индекс словаря '%s'. Message: [%s]",
                     dictionary.getName(), e.getMessage()));
+        }
+    }
+
+    public void validateUniqueFieldValues(Dictionary dictionary, UUID itemId, DictionaryItemDto itemDto) {
+        StringBuilder errorMessage = new StringBuilder();
+        Set<DictionaryField> uniqueFieldNames = dictionary.getFields()
+                .stream()
+                .filter(DictionaryField::getUniqueValue)
+                .collect(Collectors.toSet());
+        for (DictionaryField field : uniqueFieldNames) {
+            String fieldName = field.getId().toString();
+            Object fieldValue = itemDto.getFieldValues().get(fieldName);
+            if (Objects.nonNull(fieldValue) && !isUniqueFieldValue(dictionary.getId(), itemId, fieldName, fieldValue)) {
+                errorMessage.append(String.format("[%s:%s];%n", field.getName(), fieldValue));
+            }
+        }
+        if (errorMessage.length() != 0) {
+            throw new HOException("Ошибка заполнения уникальных полей: \n" + errorMessage.toString());
+        }
+    }
+
+
+    public void validateUniqueFieldValues(Dictionary dictionary, DictionaryItemDto itemDto) {
+        validateUniqueFieldValues(dictionary, null, itemDto);
+    }
+
+    private boolean isUniqueFieldValue(UUID dictId, UUID itemId, String fieldName, Object fieldValue) {
+        try {
+            BoolQueryBuilder boolQueryBuilder = new BoolQueryBuilder()
+                    .must(QueryBuilders.matchPhraseQuery(fieldName, fieldValue));
+            if (Objects.nonNull(itemId)) {
+                boolQueryBuilder.mustNot(QueryBuilders.matchPhraseQuery("_id", itemId.toString()));
+            }
+            CountRequest request = new CountRequest(dictId.toString());
+            request.query(boolQueryBuilder);
+            CountResponse response = esClient.count(request, RequestOptions.DEFAULT);
+            return response.getCount() == 0;
+        } catch (IOException e) {
+            throw new HOException(e.getMessage());
         }
     }
 }

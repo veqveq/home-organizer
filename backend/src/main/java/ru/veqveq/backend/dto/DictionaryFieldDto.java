@@ -23,4 +23,7 @@ public class DictionaryFieldDto {
 
     @Schema(description = "Значение по умолчанию")
     private String defaultValue;
+
+    @Schema(description = "Признак уникальности", defaultValue = "false")
+    private Boolean uniqueValue;
 }

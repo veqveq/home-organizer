@@ -4,7 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import ru.veqveq.backend.dto.DictionaryItemDto;
-import ru.veqveq.backend.model.entity.DictionaryItem;
+import ru.veqveq.backend.model.DictionaryItem;
 
 @Mapper
 public interface DictionaryItemMapper {

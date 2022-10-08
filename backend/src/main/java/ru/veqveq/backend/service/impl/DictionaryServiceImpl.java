@@ -51,10 +51,9 @@ public class DictionaryServiceImpl implements DictionaryService {
     }
 
     @Override
-    public DictionaryDto getById(UUID uuid) {
-        Dictionary dictionary = dictionaryRepo.findById(uuid)
+    public Dictionary getById(UUID uuid) {
+        return dictionaryRepo.findById(uuid)
                 .orElseThrow(() -> new HOException(String.format("Справочник с id %s не найден", uuid)));
-        return dictionaryMapper.toDto(dictionary);
     }
 
     @Override
