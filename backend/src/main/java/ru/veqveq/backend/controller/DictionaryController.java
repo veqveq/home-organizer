@@ -43,18 +43,8 @@ public class DictionaryController {
         return service.getRegistry(pageable);
     }
 
-    @GetMapping("/{uuid}")
-    @Operation(summary = "Получить справочник по идентификатору")
-    @PageableAsQueryParam
-    public DictionaryDto findByid(
-            @Parameter(description = "Идентификатор справочника")
-            @PathVariable(name = "uuid") UUID uuid) {
-        return service.getById(uuid);
-    }
-
     @GetMapping("/{uuid}/fields")
     @Operation(summary = "Получить поля справочника по идентификатору")
-    @PageableAsQueryParam
     public Set<DictionaryFieldDto> getFields(
             @Parameter(description = "Идентификатор справочника")
             @PathVariable(name = "uuid") UUID uuid) {

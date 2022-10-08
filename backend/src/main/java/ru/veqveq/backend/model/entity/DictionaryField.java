@@ -30,6 +30,9 @@ public class DictionaryField {
     @Column(name = "default_value")
     private String defaultValue;
 
+    @Column(name = "unique_value")
+    private Boolean uniqueValue;
+
     @ManyToOne
     @JoinColumn(name = "dictionary_id")
     private Dictionary dictionary;
