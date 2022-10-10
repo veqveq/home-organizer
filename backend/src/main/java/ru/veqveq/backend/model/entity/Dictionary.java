@@ -24,6 +24,10 @@ public class Dictionary {
     @Column(name = "name")
     private String name;
 
+    @Column(name = "es_index_name")
+    @GeneratedValue
+    private UUID esIndexName;
+
     @OneToMany(mappedBy = "dictionary", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<DictionaryField> fields = new HashSet<>();
 
@@ -34,5 +38,9 @@ public class Dictionary {
         } else {
             getFields().addAll(fields);
         }
+    }
+
+    public String getEsIndexName() {
+        return esIndexName.toString();
     }
 }
