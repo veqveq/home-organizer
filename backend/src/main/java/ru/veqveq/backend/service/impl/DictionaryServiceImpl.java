@@ -35,7 +35,8 @@ public class DictionaryServiceImpl implements DictionaryService {
         if (dictionaryRepo.existsByName(dto.getName())) {
             throw new HOException("Справочник с именем " + dto.getName() + " существует");
         }
-        Dictionary dictionary = dictionaryRepo.save(dictionaryMapper.toEntity(dto));
+        UUID esIndexRequest = UUID.randomUUID();
+        Dictionary dictionary = dictionaryRepo.save(dictionaryMapper.toEntity(dto, esIndexRequest));
         esService.initIndex(dictionary);
         return dictionary.getId();
     }
@@ -77,6 +78,12 @@ public class DictionaryServiceImpl implements DictionaryService {
                 .orElseThrow(() -> new HOException(String.format("Справочник с id %s не найден", uuid)));
 
         dictionaryMapper.merge(dictionary, dto);
+        UUID newIndexName = UUID.randomUUID();
+        dictionary = dictionaryRepo.save(dictionary);
+        esService.initIndex(dictionary, newIndexName);
+        esService.migrateIndex(dictionary.getEsIndexName(), newIndexName.toString());
+        esService.deleteIndex(dictionary);
+        dictionary.setEsIndexName(newIndexName);
         return dictionaryMapper.toDto(dictionaryRepo.save(dictionary));
     }
 

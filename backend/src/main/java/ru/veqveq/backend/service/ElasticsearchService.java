@@ -14,6 +14,7 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.reindex.ReindexRequest;
 import org.springframework.stereotype.Service;
 import ru.veqveq.backend.dto.DictionaryItemDto;
 import ru.veqveq.backend.exception.HOException;
@@ -33,9 +34,15 @@ public class ElasticsearchService {
     private final RestHighLevelClient esClient;
 
     public void initIndex(Dictionary dictionary) {
-        log.info("Start creating ES index: {}", dictionary.getId());
+        initIndex(dictionary, null);
+    }
+
+    public void initIndex(Dictionary dictionary, UUID indexName) {
+        log.info("Start creating ES index: {}", dictionary.getEsIndexName());
         try {
-            CreateIndexRequest request = new CreateIndexRequest(dictionary.getId().toString());
+            CreateIndexRequest request = Objects.isNull(indexName)
+                    ? new CreateIndexRequest(dictionary.getEsIndexName())
+                    : new CreateIndexRequest(indexName.toString());
 
             XContentBuilder builder = XContentFactory.jsonBuilder();
 
@@ -53,10 +60,10 @@ public class ElasticsearchService {
 
             CreateIndexResponse response = esClient.indices().create(request, RequestOptions.DEFAULT);
             if (!response.isAcknowledged()) {
-                log.error("Index {} is not acknowledged", dictionary.getId());
+                log.error("Index {} is not acknowledged", dictionary.getEsIndexName());
                 throw new HOException(String.format("Не удалось создать индекс словаря '%s'", dictionary.getName()));
             }
-            log.info("ES index: {} created", dictionary.getId());
+            log.info("ES index: {} created", dictionary.getEsIndexName());
         } catch (IOException e) {
             log.error("ES index creation error: {}", e.getMessage());
             throw new HOException(String.format("Не удалось создать индекс для словаря '%s'. Message: [%s]",
@@ -64,12 +71,24 @@ public class ElasticsearchService {
         }
     }
 
+    public void migrateIndex(String sourceIndex, String targetIndex) {
+        try {
+            ReindexRequest reindexRequest = new ReindexRequest();
+            reindexRequest.setSourceIndices(sourceIndex);
+            reindexRequest.setConflicts("proceed");
+            reindexRequest.setDestIndex(targetIndex);
+            esClient.reindex(reindexRequest, RequestOptions.DEFAULT);
+        } catch (IOException e) {
+            throw new HOException(e.getMessage());
+        }
+    }
+
     public void deleteIndex(Dictionary dictionary) {
         try {
-            DeleteIndexRequest request = new DeleteIndexRequest(dictionary.getId().toString());
+            DeleteIndexRequest request = new DeleteIndexRequest(dictionary.getEsIndexName());
             AcknowledgedResponse response = esClient.indices().delete(request, RequestOptions.DEFAULT);
             if (!response.isAcknowledged()) {
-                log.error("Index {} is not acknowledged", dictionary.getId());
+                log.error("Index {} is not acknowledged", dictionary.getEsIndexName());
                 throw new HOException(String.format("Не удалось удалить индекс словаря '%s'", dictionary.getName()));
             }
         } catch (IOException e) {
@@ -88,7 +107,7 @@ public class ElasticsearchService {
         for (DictionaryField field : uniqueFieldNames) {
             String fieldName = field.getId().toString();
             Object fieldValue = itemDto.getFieldValues().get(fieldName);
-            if (Objects.nonNull(fieldValue) && !isUniqueFieldValue(dictionary.getId(), itemId, fieldName, fieldValue)) {
+            if (Objects.nonNull(fieldValue) && !isUniqueFieldValue(dictionary.getEsIndexName(), itemId, fieldName, fieldValue)) {
                 errorMessage.append(String.format("[%s:%s];%n", field.getName(), fieldValue));
             }
         }
@@ -102,14 +121,14 @@ public class ElasticsearchService {
         validateUniqueFieldValues(dictionary, null, itemDto);
     }
 
-    private boolean isUniqueFieldValue(UUID dictId, UUID itemId, String fieldName, Object fieldValue) {
+    private boolean isUniqueFieldValue(String indexName, UUID itemId, String fieldName, Object fieldValue) {
         try {
             BoolQueryBuilder boolQueryBuilder = new BoolQueryBuilder()
                     .must(QueryBuilders.matchPhraseQuery(fieldName, fieldValue));
             if (Objects.nonNull(itemId)) {
                 boolQueryBuilder.mustNot(QueryBuilders.matchPhraseQuery("_id", itemId.toString()));
             }
-            CountRequest request = new CountRequest(dictId.toString());
+            CountRequest request = new CountRequest(indexName);
             request.query(boolQueryBuilder);
             CountResponse response = esClient.count(request, RequestOptions.DEFAULT);
             return response.getCount() == 0;

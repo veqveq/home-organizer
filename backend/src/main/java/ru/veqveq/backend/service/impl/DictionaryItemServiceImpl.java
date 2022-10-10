@@ -5,6 +5,7 @@ import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -16,7 +17,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.veqveq.backend.dto.DictionaryItemDto;
 import ru.veqveq.backend.exception.HOException;
-import ru.veqveq.backend.mapper.DictionaryItemMapper;
 import ru.veqveq.backend.model.DictionaryItemFilter;
 import ru.veqveq.backend.model.entity.Dictionary;
 import ru.veqveq.backend.service.DictionaryItemService;
@@ -37,13 +37,12 @@ public class DictionaryItemServiceImpl implements DictionaryItemService {
     private final DictionaryService dictionaryService;
     private final ElasticsearchService esService;
     private final RestHighLevelClient client;
-    private final DictionaryItemMapper mapper;
 
     @Override
     public UUID saveItem(UUID dictId, DictionaryItemDto dto) {
         try {
-            IndexRequest request = new IndexRequest(dictId.toString());
             Dictionary dictionary = dictionaryService.getById(dictId);
+            IndexRequest request = new IndexRequest(dictionary.getEsIndexName());
             esService.validateUniqueFieldValues(dictionary, dto);
 
             UUID id = UUID.randomUUID();
@@ -65,7 +64,7 @@ public class DictionaryItemServiceImpl implements DictionaryItemService {
     public Page<DictionaryItemDto> filter(UUID dictId, DictionaryItemFilter filter, Pageable pageable) {
         Dictionary dictionary = dictionaryService.getById(dictId);
         try {
-            SearchRequest searchRequest = new SearchRequest(dictionary.getId().toString());
+            SearchRequest searchRequest = new SearchRequest(dictionary.getEsIndexName());
             SearchSourceBuilder builder = new SearchSourceBuilder();
 
             if (Objects.nonNull(filter)) {
@@ -102,10 +101,9 @@ public class DictionaryItemServiceImpl implements DictionaryItemService {
             Dictionary dictionary = dictionaryService.getById(dictId);
             esService.validateUniqueFieldValues(dictionary, uuid, dto);
 
-            IndexRequest request = new IndexRequest(dictId.toString());
-            request.source(dto.getFieldValues());
-            request.id(uuid.toString());
-            client.index(request, RequestOptions.DEFAULT);
+            UpdateRequest request = new UpdateRequest(dictionary.getEsIndexName(),uuid.toString());
+            request.doc(dto.getFieldValues());
+            client.update(request, RequestOptions.DEFAULT);
             dto.setId(uuid.toString());
             return dto;
         } catch (IOException e) {

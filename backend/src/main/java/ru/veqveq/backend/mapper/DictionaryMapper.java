@@ -9,6 +9,8 @@ import ru.veqveq.backend.dto.DictionaryDto;
 import ru.veqveq.backend.dto.DictionaryMainPageDto;
 import ru.veqveq.backend.model.entity.Dictionary;
 
+import java.util.UUID;
+
 @Mapper(uses = {DictionaryFieldMapper.class})
 public interface DictionaryMapper {
     DictionaryDto toDto(Dictionary entity);
@@ -16,17 +18,15 @@ public interface DictionaryMapper {
     DictionaryMainPageDto toMainPageDto(Dictionary entity);
 
     @Mapping(target = "id", ignore = true)
-    Dictionary toEntity(DictionaryDto dto);
+    Dictionary toEntity(DictionaryDto dto, UUID esIndexName);
 
     @Mapping(target = "id", ignore = true)
-    Dictionary toEntity(DictionaryDto dto, String indexName);
-
-    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "esIndexName", ignore = true)
     void merge(@MappingTarget Dictionary target, DictionaryDto source);
 
     @AfterMapping
     default void setReference(@MappingTarget Dictionary dictionary) {
-        if (!CollectionUtils.isEmpty(dictionary.getFields())){
+        if (!CollectionUtils.isEmpty(dictionary.getFields())) {
             dictionary.getFields().forEach(field -> field.setDictionary(dictionary));
         }
     }
