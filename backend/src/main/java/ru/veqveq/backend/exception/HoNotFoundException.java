@@ -3,9 +3,9 @@ package ru.veqveq.backend.exception;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-@ResponseStatus(HttpStatus.BAD_REQUEST)
-public class HOException extends RuntimeException{
-    public HOException(String message) {
+@ResponseStatus(HttpStatus.NOT_FOUND)
+public class HoNotFoundException extends RuntimeException {
+    public HoNotFoundException(String message) {
         super(message);
     }
 }
