@@ -1,7 +1,7 @@
 package ru.veqveq.backend.mapper;
 
 import org.mapstruct.Mapper;
-import ru.veqveq.backend.dto.DictionaryFieldDto;
+import ru.veqveq.backend.dto.dictionary.DictionaryFieldDto;
 import ru.veqveq.backend.model.entity.DictionaryField;
 
 @Mapper

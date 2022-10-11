@@ -10,7 +10,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
-import ru.veqveq.backend.dto.DictionaryItemDto;
+import ru.veqveq.backend.dto.item.OutputDictionaryItemDto;
+import ru.veqveq.backend.dto.item.input.InputDictionaryItemDto;
+import ru.veqveq.backend.dto.item.input.impl.SaveDictionaryItemDto;
+import ru.veqveq.backend.dto.item.input.impl.UpdateDictionaryItemDto;
 import ru.veqveq.backend.model.DictionaryItemFilter;
 import ru.veqveq.backend.service.DictionaryItemService;
 
@@ -28,40 +31,42 @@ public class DictionaryItemController {
     public UUID save(@Parameter(description = "Идентификатор справочника")
                      @PathVariable(name = "dictId") UUID dictId,
                      @Parameter(description = "Запись справочника")
-                     @RequestBody DictionaryItemDto dto) {
-        return service.saveItem(dictId, dto);
+                     @RequestBody InputDictionaryItemDto commons) {
+        SaveDictionaryItemDto dto = new SaveDictionaryItemDto(commons, dictId);
+        return service.saveItem(dto);
     }
 
     @GetMapping
     @Operation(summary = "Получить все записи")
     @PageableAsQueryParam
-    public Page<DictionaryItemDto> findAll(@Parameter(description = "Идентификатор справочника")
-                                           @PathVariable(name = "dictId") UUID dictId,
-                                           @Parameter(hidden = true)
-                                           @PageableDefault(sort = "_id", direction = Sort.Direction.ASC) Pageable pageable) {
+    public Page<OutputDictionaryItemDto> findAll(@Parameter(description = "Идентификатор справочника")
+                                                 @PathVariable(name = "dictId") UUID dictId,
+                                                 @Parameter(hidden = true)
+                                                 @PageableDefault(sort = "_id", direction = Sort.Direction.ASC) Pageable pageable) {
         return service.findAll(dictId, pageable);
     }
 
     @GetMapping("/filter")
     @Operation(summary = "Фильтр")
     @PageableAsQueryParam
-    public Page<DictionaryItemDto> filter(@Parameter(description = "Идентификатор справочника")
-                                          @PathVariable(name = "dictId") UUID dictId,
-                                          @Parameter(description = "Фраза для поиска") DictionaryItemFilter filter,
-                                          @Parameter(hidden = true)
-                                          @PageableDefault Pageable pageable) {
+    public Page<OutputDictionaryItemDto> filter(@Parameter(description = "Идентификатор справочника")
+                                                @PathVariable(name = "dictId") UUID dictId,
+                                                @Parameter(description = "Фраза для поиска") DictionaryItemFilter filter,
+                                                @Parameter(hidden = true)
+                                                @PageableDefault Pageable pageable) {
         return service.filter(dictId, filter, pageable);
     }
 
     @PutMapping("/{uuid}")
     @Operation(summary = "Редактирование записи")
-    public DictionaryItemDto update(@Parameter(description = "Идентификатор справочника")
-                                    @PathVariable(name = "dictId") UUID dictId,
-                                    @Parameter(description = "Идентификатор записи")
-                                    @PathVariable UUID uuid,
-                                    @Parameter(description = "Запись справочника")
-                                    @RequestBody DictionaryItemDto dto) {
-        return service.update(dictId, uuid, dto);
+    public OutputDictionaryItemDto update(@Parameter(description = "Идентификатор справочника")
+                                          @PathVariable(name = "dictId") UUID dictId,
+                                          @Parameter(description = "Идентификатор записи")
+                                          @PathVariable UUID uuid,
+                                          @Parameter(description = "Запись справочника")
+                                          @RequestBody InputDictionaryItemDto commons) {
+        UpdateDictionaryItemDto dto = new UpdateDictionaryItemDto(commons, uuid, dictId);
+        return service.update(dto);
     }
 
     @DeleteMapping("/{uuid}")

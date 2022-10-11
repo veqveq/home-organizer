@@ -27,9 +27,7 @@
             <column name="dictionary_id" type="uuid" remarks="Идентификатор справочника">
                 <constraints nullable="false"/>
             </column>
-            <column name="unique_value" type="boolean" remarks="Уникальное поле" defaultValueBoolean="false">
-                <constraints nullable="false"/>
-            </column>
+            <column name="unique_value" type="boolean" remarks="Уникальное поле" defaultValueBoolean="false"/>
         </createTable>
         <addForeignKeyConstraint baseTableName="dictionary_field" baseColumnNames="dictionary_id"
                                  constraintName="fk_dictionary_field"

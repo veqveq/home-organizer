@@ -16,16 +16,17 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.reindex.ReindexRequest;
 import org.springframework.stereotype.Service;
-import ru.veqveq.backend.dto.DictionaryItemDto;
+import ru.veqveq.backend.dto.item.input.InputDictionaryItemDto;
+import ru.veqveq.backend.dto.item.input.impl.UpdateDictionaryItemDto;
 import ru.veqveq.backend.exception.HOException;
 import ru.veqveq.backend.model.entity.Dictionary;
 import ru.veqveq.backend.model.entity.DictionaryField;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -98,36 +99,65 @@ public class ElasticsearchService {
         }
     }
 
-    public void validateUniqueFieldValues(Dictionary dictionary, UUID itemId, DictionaryItemDto itemDto) {
-        StringBuilder errorMessage = new StringBuilder();
-        Set<DictionaryField> uniqueFieldNames = dictionary.getFields()
-                .stream()
-                .filter(DictionaryField::getUniqueValue)
-                .collect(Collectors.toSet());
-        for (DictionaryField field : uniqueFieldNames) {
-            String fieldName = field.getId().toString();
-            Object fieldValue = itemDto.getFieldValues().get(fieldName);
-            if (Objects.nonNull(fieldValue) && !isUniqueFieldValue(dictionary.getEsIndexName(), itemId, fieldName, fieldValue)) {
-                errorMessage.append(String.format("[%s:%s];%n", field.getName(), fieldValue));
-            }
-        }
-        if (errorMessage.length() != 0) {
-            throw new HOException("Ошибка заполнения уникальных полей: \n" + errorMessage.toString());
-        }
+    public void validateUniqueFieldValues(Dictionary dictionary, UpdateDictionaryItemDto dto) {
+//        StringBuilder errorMessage = new StringBuilder();
+//        Set<DictionaryField> uniqueFieldNames = dictionary.getFields()
+//                .stream()
+//                .filter(DictionaryField::getUniqueValue)
+//                .collect(Collectors.toSet());
+//        for (DictionaryField field : uniqueFieldNames) {
+//            String fieldName = field.getId().toString();
+//            Object fieldValue = itemDto.getFieldValues().get(fieldName);
+//            if (Objects.nonNull(fieldValue) && !isUniqueFieldValue(dictionary.getEsIndexName(), itemId, fieldName, fieldValue)) {
+//                errorMessage.append(String.format("[%s:%s];%n", field.getName(), fieldValue));
+//            }
+//        }
+//        if (errorMessage.length() != 0) {
+//            throw new HOException("Ошибка заполнения уникальных полей: \n" + errorMessage.toString());
+//        }
     }
 
-
-    public void validateUniqueFieldValues(Dictionary dictionary, DictionaryItemDto itemDto) {
-        validateUniqueFieldValues(dictionary, null, itemDto);
+    private void validateUniqueFieldValues(Dictionary dictionary, InputDictionaryItemDto inputDictionaryItemDto) {
+//        StringBuilder errorMessage = new StringBuilder();
+//        Set<DictionaryField> uniqueFieldNames = dictionary.getFields()
+//                .stream()
+//                .filter(DictionaryField::getUniqueValue)
+//                .collect(Collectors.toSet());
+//        for (DictionaryField field : uniqueFieldNames) {
+//            String fieldName = field.getId().toString();
+//            Object fieldValue = commonItemDto.getFieldValues().get(fieldName);
+//            if (Objects.nonNull(fieldValue) && !isUniqueFieldValue(dictionary.getEsIndexName(), itemId, fieldName, fieldValue)) {
+//                errorMessage.append(String.format("[%s:%s];%n", field.getName(), fieldValue));
+//            }
+//        }
+//        if (errorMessage.length() != 0) {
+//            throw new HOException("Ошибка заполнения уникальных полей: \n" + errorMessage.toString());
+//        }
     }
 
-    private boolean isUniqueFieldValue(String indexName, UUID itemId, String fieldName, Object fieldValue) {
+    public boolean isUniqueFieldValue(@NotBlank String indexName,
+                                       @NotNull UUID itemId,
+                                       @NotBlank String fieldName,
+                                       @NotNull Object fieldValue) {
         try {
             BoolQueryBuilder boolQueryBuilder = new BoolQueryBuilder()
                     .must(QueryBuilders.matchPhraseQuery(fieldName, fieldValue));
-            if (Objects.nonNull(itemId)) {
-                boolQueryBuilder.mustNot(QueryBuilders.matchPhraseQuery("_id", itemId.toString()));
-            }
+            boolQueryBuilder.mustNot(QueryBuilders.matchPhraseQuery("_id", itemId.toString()));
+            CountRequest request = new CountRequest(indexName);
+            request.query(boolQueryBuilder);
+            CountResponse response = esClient.count(request, RequestOptions.DEFAULT);
+            return response.getCount() == 0;
+        } catch (IOException e) {
+            throw new HOException(e.getMessage());
+        }
+    }
+
+    public boolean isUniqueFieldValue(@NotBlank String indexName,
+                                       @NotBlank String fieldName,
+                                       @NotNull Object fieldValue) {
+        try {
+            BoolQueryBuilder boolQueryBuilder = new BoolQueryBuilder()
+                    .must(QueryBuilders.matchPhraseQuery(fieldName, fieldValue));
             CountRequest request = new CountRequest(indexName);
             request.query(boolQueryBuilder);
             CountResponse response = esClient.count(request, RequestOptions.DEFAULT);

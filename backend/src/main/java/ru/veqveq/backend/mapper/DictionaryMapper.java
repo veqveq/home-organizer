@@ -5,8 +5,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.springframework.util.CollectionUtils;
-import ru.veqveq.backend.dto.DictionaryDto;
-import ru.veqveq.backend.dto.DictionaryMainPageDto;
+import ru.veqveq.backend.dto.dictionary.DictionaryDto;
+import ru.veqveq.backend.dto.dictionary.DictionaryMainPageDto;
 import ru.veqveq.backend.model.entity.Dictionary;
 
 import java.util.UUID;
