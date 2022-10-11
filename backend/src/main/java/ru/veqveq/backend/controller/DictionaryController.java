@@ -22,7 +22,7 @@ import java.util.UUID;
 
 @Tag(name = "Контроллер справочников")
 @RestController
-@RequestMapping("/api/v1/dictionaries")
+@RequestMapping("/ho/api/v1/dictionaries")
 @RequiredArgsConstructor
 public class DictionaryController {
     private final DictionaryService service;
