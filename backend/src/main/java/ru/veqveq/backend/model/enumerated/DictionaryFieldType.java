@@ -12,7 +12,16 @@ public enum DictionaryFieldType {
     Text("Строка", Function.identity()),
     Long("Целое число", java.lang.Long::parseLong),
     Double("Дробное число", java.lang.Double::parseDouble),
-    Boolean("Логическое", java.lang.Boolean::parseBoolean),
+    Boolean("Логическое", val -> {
+        val = val.trim();
+        if (val.equalsIgnoreCase("true")) {
+            return true;
+        } else if (val.equalsIgnoreCase("false")) {
+            return false;
+        } else {
+            throw new RuntimeException();
+        }
+    }),
     Date("Дата", Instant::parse);
     private final String name;
     private final Function<String, ?> mappingFunction;

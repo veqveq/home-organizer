@@ -27,11 +27,14 @@ public class DictionaryField {
     @Column(name = "type")
     private DictionaryFieldType type;
 
+    @Column(name = "unique_value")
+    private Boolean unique;
+
+    @Column(name = "required_value")
+    private Boolean required;
+
     @Column(name = "default_value")
     private String defaultValue;
-
-    @Column(name = "unique_value")
-    private Boolean uniqueValue;
 
     @ManyToOne
     @JoinColumn(name = "dictionary_id")

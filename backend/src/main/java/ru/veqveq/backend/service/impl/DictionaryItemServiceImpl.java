@@ -15,15 +15,19 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import ru.veqveq.backend.dto.DictionaryItemDto;
+import org.springframework.validation.annotation.Validated;
+import ru.veqveq.backend.dto.item.OutputDictionaryItemDto;
+import ru.veqveq.backend.dto.item.input.impl.SaveDictionaryItemDto;
+import ru.veqveq.backend.dto.item.input.impl.UpdateDictionaryItemDto;
 import ru.veqveq.backend.exception.HOException;
+import ru.veqveq.backend.mapper.DictionaryItemMapper;
 import ru.veqveq.backend.model.DictionaryItemFilter;
 import ru.veqveq.backend.model.entity.Dictionary;
 import ru.veqveq.backend.service.DictionaryItemService;
 import ru.veqveq.backend.service.DictionaryService;
-import ru.veqveq.backend.service.ElasticsearchService;
 import ru.veqveq.backend.util.ElasticUtils;
 
+import javax.validation.Valid;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -32,19 +36,18 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
+@Validated
 @RequiredArgsConstructor
 public class DictionaryItemServiceImpl implements DictionaryItemService {
     private final DictionaryService dictionaryService;
-    private final ElasticsearchService esService;
     private final RestHighLevelClient client;
+    private final DictionaryItemMapper mapper;
 
     @Override
-    public UUID saveItem(UUID dictId, DictionaryItemDto dto) {
+    public UUID saveItem(@Valid SaveDictionaryItemDto dto) {
         try {
-            Dictionary dictionary = dictionaryService.getById(dictId);
+            Dictionary dictionary = dictionaryService.getById(dto.getDictionaryId());
             IndexRequest request = new IndexRequest(dictionary.getEsIndexName());
-            esService.validateUniqueFieldValues(dictionary, dto);
-
             UUID id = UUID.randomUUID();
             request.source(dto.getFieldValues());
             request.id(id.toString());
@@ -56,12 +59,12 @@ public class DictionaryItemServiceImpl implements DictionaryItemService {
     }
 
     @Override
-    public Page<DictionaryItemDto> findAll(UUID dictId, Pageable pageable) {
+    public Page<OutputDictionaryItemDto> findAll(UUID dictId, Pageable pageable) {
         return filter(dictId, null, pageable);
     }
 
     @Override
-    public Page<DictionaryItemDto> filter(UUID dictId, DictionaryItemFilter filter, Pageable pageable) {
+    public Page<OutputDictionaryItemDto> filter(UUID dictId, DictionaryItemFilter filter, Pageable pageable) {
         Dictionary dictionary = dictionaryService.getById(dictId);
         try {
             SearchRequest searchRequest = new SearchRequest(dictionary.getEsIndexName());
@@ -81,13 +84,8 @@ public class DictionaryItemServiceImpl implements DictionaryItemService {
 
             searchRequest.source(builder);
             SearchResponse response = client.search(searchRequest, RequestOptions.DEFAULT);
-            List<DictionaryItemDto> items = Arrays.stream(response.getHits().getHits())
-                    .map(hit -> {
-                        DictionaryItemDto dto = new DictionaryItemDto();
-                        dto.setId(hit.getId());
-                        dto.setFieldValues(hit.getSourceAsMap());
-                        return dto;
-                    })
+            List<OutputDictionaryItemDto> items = Arrays.stream(response.getHits().getHits())
+                    .map(hit -> new OutputDictionaryItemDto(UUID.fromString(hit.getId()), hit.getSourceAsMap()))
                     .collect(Collectors.toList());
             return new PageImpl<>(items, pageable, response.getHits().getTotalHits().value);
         } catch (IOException e) {
@@ -96,16 +94,13 @@ public class DictionaryItemServiceImpl implements DictionaryItemService {
     }
 
     @Override
-    public DictionaryItemDto update(UUID dictId, UUID uuid, DictionaryItemDto dto) {
+    public OutputDictionaryItemDto update(@Valid UpdateDictionaryItemDto dto) {
         try {
-            Dictionary dictionary = dictionaryService.getById(dictId);
-            esService.validateUniqueFieldValues(dictionary, uuid, dto);
-
-            UpdateRequest request = new UpdateRequest(dictionary.getEsIndexName(),uuid.toString());
+            Dictionary dictionary = dictionaryService.getById(dto.getDictionaryId());
+            UpdateRequest request = new UpdateRequest(dictionary.getEsIndexName(), dto.getId().toString());
             request.doc(dto.getFieldValues());
             client.update(request, RequestOptions.DEFAULT);
-            dto.setId(uuid.toString());
-            return dto;
+            return mapper.toGetDto(dto);
         } catch (IOException e) {
             throw new HOException(e.getMessage());
         }
@@ -114,7 +109,8 @@ public class DictionaryItemServiceImpl implements DictionaryItemService {
     @Override
     public void delete(UUID dictId, UUID uuid) {
         try {
-            DeleteRequest request = new DeleteRequest(dictId.toString());
+            Dictionary dictionary = dictionaryService.getById(dictId);
+            DeleteRequest request = new DeleteRequest(dictionary.getEsIndexName());
             request.id(uuid.toString());
             client.delete(request, RequestOptions.DEFAULT);
         } catch (IOException e) {

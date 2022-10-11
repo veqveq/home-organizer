@@ -10,12 +10,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
-import ru.veqveq.backend.dto.DictionaryDto;
-import ru.veqveq.backend.dto.DictionaryFieldDto;
-import ru.veqveq.backend.dto.DictionaryMainPageDto;
+import ru.veqveq.backend.dto.dictionary.DictionaryDto;
+import ru.veqveq.backend.dto.dictionary.DictionaryFieldDto;
+import ru.veqveq.backend.dto.dictionary.DictionaryMainPageDto;
 import ru.veqveq.backend.model.entity.Dictionary;
 import ru.veqveq.backend.service.DictionaryService;
 
+import javax.validation.Valid;
 import java.util.Set;
 import java.util.UUID;
 
@@ -30,7 +31,7 @@ public class DictionaryController {
     @Operation(summary = "Сохранить справочник")
     public UUID save(
             @Parameter(description = "Запись справочник")
-            @RequestBody DictionaryDto dto) {
+            @Valid @RequestBody DictionaryDto dto) {
         return service.saveDictionary(dto);
     }
 

@@ -1,4 +1,4 @@
-package ru.veqveq.backend.dto;
+package ru.veqveq.backend.dto.dictionary;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;

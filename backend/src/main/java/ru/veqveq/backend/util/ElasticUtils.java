@@ -19,20 +19,22 @@ import java.util.stream.Collectors;
 public class ElasticUtils {
     public void addCommonFilters(BoolQueryBuilder builder, Dictionary dictionary, List<String> commons) {
         String[] fieldNames = getTextFields(dictionary, UUID::toString).toArray(new String[0]);
-        Set<String> tokens = commons.stream()
-                .map(common -> {
-                    String commonStr = common.trim().replaceAll("\\s+", " ");
-                    return Set.of(commonStr.split("\\s"));
-                })
-                .reduce((strings, strings2) -> {
-                    strings.addAll(strings2);
-                    return strings;
-                })
-                .orElse(Collections.emptySet());
-        for (String token : tokens) {
-            builder.should(QueryBuilders.multiMatchQuery(token, fieldNames).fuzziness(Fuzziness.AUTO));
-            for (String fieldName : fieldNames) {
-                builder.must(QueryBuilders.matchPhrasePrefixQuery(fieldName, token));
+        if (!CollectionUtils.isEmpty(commons)) {
+            Set<String> tokens = commons.stream()
+                    .map(common -> {
+                        String commonStr = common.trim().replaceAll("\\s+", " ");
+                        return Set.of(commonStr.split("\\s"));
+                    })
+                    .reduce((strings, strings2) -> {
+                        strings.addAll(strings2);
+                        return strings;
+                    })
+                    .orElse(Collections.emptySet());
+            for (String token : tokens) {
+                builder.should(QueryBuilders.multiMatchQuery(token, fieldNames).fuzziness(Fuzziness.AUTO));
+                for (String fieldName : fieldNames) {
+                    builder.must(QueryBuilders.matchPhrasePrefixQuery(fieldName, token));
+                }
             }
         }
     }
@@ -49,7 +51,7 @@ public class ElasticUtils {
         if (!CollectionUtils.isEmpty(filter.getCommonFilters())) {
             highlightFields.addAll(getTextFields(dictionary, val -> new HighlightBuilder.Field(val.toString())));
         }
-        if (!CollectionUtils.isEmpty(filter.getFieldFilters())){
+        if (!CollectionUtils.isEmpty(filter.getFieldFilters())) {
             highlightFields.addAll(filter.getFieldFilters().keySet().stream().map(HighlightBuilder.Field::new).collect(Collectors.toList()));
         }
         builder.fields().addAll(highlightFields);
