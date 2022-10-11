@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.veqveq.backend.dto.item.input.InputDictionaryItemDto;
 import ru.veqveq.backend.dto.item.input.impl.SaveDictionaryItemDto;
 import ru.veqveq.backend.dto.item.input.impl.UpdateDictionaryItemDto;
-import ru.veqveq.backend.exception.HOException;
+import ru.veqveq.backend.exception.HoException;
 import ru.veqveq.backend.validation.item.validators.AbstractItemValidator;
 
 import javax.validation.ConstraintValidator;
@@ -24,7 +24,7 @@ public class DictionaryItemValidator implements ConstraintValidator<DictionaryIt
         AbstractItemValidator validator = validators.stream()
                 .filter(val -> val.check(inputDictionaryItemDto))
                 .findFirst()
-                .orElseThrow(() -> new HOException("Не найден валидатор сущности"));
+                .orElseThrow(() -> new HoException("Не найден валидатор сущности"));
 
         if (inputDictionaryItemDto instanceof SaveDictionaryItemDto) {
             log.info("It is save operation");

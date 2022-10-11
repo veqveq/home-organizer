@@ -31,4 +31,18 @@ public class ExceptionControllerInterceptor {
         ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST, message);
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(HoException.class)
+    public ResponseEntity<ErrorResponse> handleHoException(HoException exception) {
+        log.error(exception.getMessage());
+        ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST, exception.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(HoNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleHoNotFoundException(HoNotFoundException exception) {
+        log.error(exception.getMessage());
+        ErrorResponse response = new ErrorResponse(HttpStatus.NOT_FOUND, exception.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
 }

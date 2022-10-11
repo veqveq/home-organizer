@@ -16,9 +16,7 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.reindex.ReindexRequest;
 import org.springframework.stereotype.Service;
-import ru.veqveq.backend.dto.item.input.InputDictionaryItemDto;
-import ru.veqveq.backend.dto.item.input.impl.UpdateDictionaryItemDto;
-import ru.veqveq.backend.exception.HOException;
+import ru.veqveq.backend.exception.HoException;
 import ru.veqveq.backend.model.entity.Dictionary;
 import ru.veqveq.backend.model.entity.DictionaryField;
 
@@ -62,83 +60,54 @@ public class ElasticsearchService {
             CreateIndexResponse response = esClient.indices().create(request, RequestOptions.DEFAULT);
             if (!response.isAcknowledged()) {
                 log.error("Index {} is not acknowledged", dictionary.getEsIndexName());
-                throw new HOException(String.format("Не удалось создать индекс словаря '%s'", dictionary.getName()));
+                throw new HoException(String.format("Не удалось создать индекс словаря '%s'", dictionary.getName()));
             }
             log.info("ES index: {} created", dictionary.getEsIndexName());
         } catch (IOException e) {
             log.error("ES index creation error: {}", e.getMessage());
-            throw new HOException(String.format("Не удалось создать индекс для словаря '%s'. Message: [%s]",
+            throw new HoException(String.format("Не удалось создать индекс для словаря '%s'. Message: [%s]",
                     dictionary.getName(), e.getMessage()));
         }
     }
 
     public void migrateIndex(String sourceIndex, String targetIndex) {
+        log.info("Reindex {} -> {} has started", sourceIndex, targetIndex);
         try {
             ReindexRequest reindexRequest = new ReindexRequest();
             reindexRequest.setSourceIndices(sourceIndex);
             reindexRequest.setConflicts("proceed");
             reindexRequest.setDestIndex(targetIndex);
             esClient.reindex(reindexRequest, RequestOptions.DEFAULT);
+            log.info("Reindex {} -> {} successful", sourceIndex, targetIndex);
         } catch (IOException e) {
-            throw new HOException(e.getMessage());
+            log.error("Reindex {} -> {} failed", sourceIndex, targetIndex);
+            throw new HoException(String.format("Ошибка реиндексации %s -> %s: %s",
+                    sourceIndex, targetIndex, e.getMessage()));
         }
     }
 
     public void deleteIndex(Dictionary dictionary) {
+        log.info("Deletion {} has started", dictionary.getEsIndexName());
         try {
             DeleteIndexRequest request = new DeleteIndexRequest(dictionary.getEsIndexName());
             AcknowledgedResponse response = esClient.indices().delete(request, RequestOptions.DEFAULT);
             if (!response.isAcknowledged()) {
                 log.error("Index {} is not acknowledged", dictionary.getEsIndexName());
-                throw new HOException(String.format("Не удалось удалить индекс словаря '%s'", dictionary.getName()));
+                throw new HoException(String.format("Не удалось удалить индекс словаря '%s'", dictionary.getName()));
             }
         } catch (IOException e) {
             log.error("ES index delete error: {}", e.getMessage());
-            throw new HOException(String.format("Не удалось удалить индекс словаря '%s'. Message: [%s]",
+            throw new HoException(String.format("Не удалось удалить индекс словаря '%s'. Message: [%s]",
                     dictionary.getName(), e.getMessage()));
         }
     }
 
-    public void validateUniqueFieldValues(Dictionary dictionary, UpdateDictionaryItemDto dto) {
-//        StringBuilder errorMessage = new StringBuilder();
-//        Set<DictionaryField> uniqueFieldNames = dictionary.getFields()
-//                .stream()
-//                .filter(DictionaryField::getUniqueValue)
-//                .collect(Collectors.toSet());
-//        for (DictionaryField field : uniqueFieldNames) {
-//            String fieldName = field.getId().toString();
-//            Object fieldValue = itemDto.getFieldValues().get(fieldName);
-//            if (Objects.nonNull(fieldValue) && !isUniqueFieldValue(dictionary.getEsIndexName(), itemId, fieldName, fieldValue)) {
-//                errorMessage.append(String.format("[%s:%s];%n", field.getName(), fieldValue));
-//            }
-//        }
-//        if (errorMessage.length() != 0) {
-//            throw new HOException("Ошибка заполнения уникальных полей: \n" + errorMessage.toString());
-//        }
-    }
-
-    private void validateUniqueFieldValues(Dictionary dictionary, InputDictionaryItemDto inputDictionaryItemDto) {
-//        StringBuilder errorMessage = new StringBuilder();
-//        Set<DictionaryField> uniqueFieldNames = dictionary.getFields()
-//                .stream()
-//                .filter(DictionaryField::getUniqueValue)
-//                .collect(Collectors.toSet());
-//        for (DictionaryField field : uniqueFieldNames) {
-//            String fieldName = field.getId().toString();
-//            Object fieldValue = commonItemDto.getFieldValues().get(fieldName);
-//            if (Objects.nonNull(fieldValue) && !isUniqueFieldValue(dictionary.getEsIndexName(), itemId, fieldName, fieldValue)) {
-//                errorMessage.append(String.format("[%s:%s];%n", field.getName(), fieldValue));
-//            }
-//        }
-//        if (errorMessage.length() != 0) {
-//            throw new HOException("Ошибка заполнения уникальных полей: \n" + errorMessage.toString());
-//        }
-    }
-
     public boolean isUniqueFieldValue(@NotBlank String indexName,
-                                       @NotNull UUID itemId,
-                                       @NotBlank String fieldName,
-                                       @NotNull Object fieldValue) {
+                                      @NotNull UUID itemId,
+                                      @NotBlank String fieldName,
+                                      @NotNull Object fieldValue) {
+        log.info("Index: {}. Item: {}. Checking field {}:{} for unique has started",
+                indexName, itemId, fieldName, fieldValue);
         try {
             BoolQueryBuilder boolQueryBuilder = new BoolQueryBuilder()
                     .must(QueryBuilders.matchPhraseQuery(fieldName, fieldValue));
@@ -148,13 +117,16 @@ public class ElasticsearchService {
             CountResponse response = esClient.count(request, RequestOptions.DEFAULT);
             return response.getCount() == 0;
         } catch (IOException e) {
-            throw new HOException(e.getMessage());
+            log.info("Checking for unique failed");
+            throw new HoException(String.format("Ошибка в процессе проверки уникальности значения [%s:%s]: %s",
+                    fieldName, fieldValue, e.getMessage()));
         }
     }
 
     public boolean isUniqueFieldValue(@NotBlank String indexName,
-                                       @NotBlank String fieldName,
-                                       @NotNull Object fieldValue) {
+                                      @NotBlank String fieldName,
+                                      @NotNull Object fieldValue) {
+        log.info("Index: {}. Checking field {}:{} for unique has started", indexName, fieldName, fieldValue);
         try {
             BoolQueryBuilder boolQueryBuilder = new BoolQueryBuilder()
                     .must(QueryBuilders.matchPhraseQuery(fieldName, fieldValue));
@@ -163,7 +135,9 @@ public class ElasticsearchService {
             CountResponse response = esClient.count(request, RequestOptions.DEFAULT);
             return response.getCount() == 0;
         } catch (IOException e) {
-            throw new HOException(e.getMessage());
+            log.info("Checking for unique failed");
+            throw new HoException(String.format("Ошибка в процессе проверки уникальности значения [%s:%s]: %s",
+                    fieldName, fieldValue, e.getMessage()));
         }
     }
 }
