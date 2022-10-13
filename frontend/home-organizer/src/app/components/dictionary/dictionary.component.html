@@ -1,0 +1,18 @@
+<div class="rounded-2xl  border text-lg text-left rounded flex items-center flex-row mb-2
+  hover:text-blue-500 hover:bg-gray-200">
+  <a class="pl-6 pr-2 py-8 grow text-lg flex text-center flex-row font-bold"
+     routerLink="/"
+  >{{ dictionary.name }}</a>
+  <div class="py-4 px-6">
+    <button
+      (click)="modalService.open()"
+      class="h-[50px] w-[50px] border px-2 py-2 mr-5 rounded-full bg-amber-600 text-white hover:bg-amber-300">
+      Edit
+    </button>
+    <button
+      (click)="service.delete(dictionary)"
+      class="h-[50px] w-[50px] border px-2 py-2 rounded-full bg-red-600 text-white hover:bg-red-300">
+      Del
+    </button>
+  </div>
+</div>

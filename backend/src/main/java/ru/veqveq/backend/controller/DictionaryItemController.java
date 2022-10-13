@@ -21,7 +21,7 @@ import java.util.UUID;
 
 @Tag(name = "Контроллер значений справочников")
 @RestController
-@RequestMapping("/api/v1/items/{dictId}")
+@RequestMapping("/ho/api/v1/items/{dictId}")
 @RequiredArgsConstructor
 public class DictionaryItemController {
     private final DictionaryItemService service;

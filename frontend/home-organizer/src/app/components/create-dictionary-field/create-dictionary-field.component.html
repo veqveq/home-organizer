@@ -1,0 +1,65 @@
+<div class="flex  mb-auto">
+  <h2 class="py-2 grow font-bold text-lg pl-6 rounded-tl-2xl border border-b-0 truncate">Новая колонка: {{name.value}}</h2>
+  <button
+    type="button"
+    (click)="deleteComponent()"
+    class="border border-b-0 border-l-0 px-4 py-2 mb-0 rounded-tr-2xl font-bold text-lg"> &times;</button>
+</div>
+<form [formGroup]="form" class="px-4 py-4 border rounded-b-2 mb-4">
+  <div class="flex items-stretch">
+    <div class="mb-2 mr-6 w-1/2">
+      <h3 class="text-center">Название</h3>
+      <input
+        [ngClass]="name.errors?.required ? 'border-2 border-red-500':''"
+        class="px-2 py-2 border rounded w-full"
+        type="text"
+        placeholder="Название колонки..."
+        formControlName="name"
+        required>
+      <p *ngIf="name.errors?.required" class="text-red-600 font-medium mb-2 text-center"> Обязательное </p>
+    </div>
+    <div class="mb-2 w-1/2">
+      <h3 class="text-center">Тип</h3>
+      <select class="px-2 py-2 border rounded w-full" formControlName="type"
+              [ngClass]="[type.value != '' ? 'text-black' : 'text-gray-400',
+              type.errors?.required ? 'border-2 border-red-500':'']"
+              (change)="defaultValue.setValue('')"
+              required>
+
+        <option value='' class="text-gray-400" *ngIf="type.value == ''">Тип данных</option>
+        <option class="text-black" *ngFor="let fldType of types" [value]="fldType.id">
+          {{fldType.value}}
+        </option>
+
+      </select>
+      <p *ngIf="type.errors?.required" class="text-red-600 font-medium mb-2 text-center"> Обязательное </p>
+    </div>
+  </div>
+  <div class="mb-2">
+    <div>
+      <div class="flex items-stretch mb-2">
+        <div class="flex items-stretch mr-6" *ngIf="type.value != ''">
+          <input class="mr-2" type="checkbox" formControlName="required">
+          <h4>Обязательный</h4>
+        </div>
+        <div *ngIf="type.value != 'Boolean' && type.value != ''" class="flex items-stretch">
+          <input class="mr-2" type="checkbox" formControlName="unique">
+          <h4>Уникальный</h4>
+        </div>
+      </div>
+      <div *ngIf="required.value">
+        <input class="px-2 py-2 border rounded w-full" type="text" placeholder="Значение по умолчанию..."
+               formControlName="defaultValue" *ngIf="type.value == 'Text'">
+        <input class="px-2 py-2 border rounded w-full" type="number" placeholder="Значение по умолчанию..."
+               formControlName="defaultValue" *ngIf="type.value == 'Long' || type.value == 'Double'">
+        <input class="px-2 py-2 border rounded w-full" type="date" placeholder="Значение по умолчанию..."
+               formControlName="defaultValue" *ngIf="type.value == 'Date'">
+        <div *ngIf="type.value == 'Boolean' " class="flex items-stretch">
+          <h4 class="mr-6">Значение по умолчанию</h4>
+          <input class="mr-2" type="checkbox" formControlName="defaultValue">
+          <h4>{{defaultValue.value == '1' ? 'Включено' : 'Выключено'}}</h4>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
