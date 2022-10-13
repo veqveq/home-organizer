@@ -1,5 +1,11 @@
-<h2 class="font-bold text-lg pl-6">Новая колонка: {{name.value}}</h2>
-<form [formGroup]="form" class="px-4 py-4 border rounded-2xl mb-4">
+<div class="flex  mb-auto">
+  <h2 class="py-2 grow font-bold text-lg pl-6 rounded-tl-2xl border border-b-0 truncate">Новая колонка: {{name.value}}</h2>
+  <button
+    type="button"
+    (click)="deleteComponent()"
+    class="border border-b-0 border-l-0 px-4 py-2 mb-0 rounded-tr-2xl font-bold text-lg"> &times;</button>
+</div>
+<form [formGroup]="form" class="px-4 py-4 border rounded-b-2 mb-4">
   <div class="flex items-stretch">
     <div class="mb-2 mr-6 w-1/2">
       <h3 class="text-center">Название</h3>
@@ -9,7 +15,7 @@
         type="text"
         placeholder="Название колонки..."
         formControlName="name"
-        required="true">
+        required>
       <p *ngIf="name.errors?.required" class="text-red-600 font-medium mb-2 text-center"> Обязательное </p>
     </div>
     <div class="mb-2 w-1/2">
@@ -18,7 +24,7 @@
               [ngClass]="[type.value != '' ? 'text-black' : 'text-gray-400',
               type.errors?.required ? 'border-2 border-red-500':'']"
               (change)="defaultValue.setValue('')"
-              required="true">
+              required>
 
         <option value='' class="text-gray-400" *ngIf="type.value == ''">Тип данных</option>
         <option class="text-black" *ngFor="let fldType of types" [value]="fldType.id">
@@ -51,7 +57,7 @@
         <div *ngIf="type.value == 'Boolean' " class="flex items-stretch">
           <h4 class="mr-6">Значение по умолчанию</h4>
           <input class="mr-2" type="checkbox" formControlName="defaultValue">
-          <h4>{{defaultValue.value == '1'? 'Включено' : 'Выключено'}}</h4>
+          <h4>{{defaultValue.value == '1' ? 'Включено' : 'Выключено'}}</h4>
         </div>
       </div>
     </div>

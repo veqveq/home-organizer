@@ -1,6 +1,4 @@
-import { Component, OnInit } from '@angular/core';
-import {Observable, tap} from "rxjs";
-import {Dictionary} from "../../models/dictionary";
+import {Component, OnInit} from '@angular/core';
 import {DictionaryService} from "../../services/dictionary.service";
 import {ModalService} from "../../services/modal.service";
 
@@ -11,21 +9,18 @@ import {ModalService} from "../../services/modal.service";
 export class DictionaryRegisterComponent implements OnInit {
 
   title = 'Справочники';
-  dictionaries$: Observable<Dictionary[]>
   loading = false
   dictionaryFilter = ''
 
   constructor(
-    private dictionaryService: DictionaryService,
+    public dictionaryService: DictionaryService,
     public modalService: ModalService
   ) {
   }
 
   ngOnInit(): void {
     this.loading = true
-    this.dictionaries$ = this.dictionaryService.getAll().pipe(
-      tap(() => this.loading = false)
-    )
+    this.dictionaryService.getAll().subscribe(() => this.loading = false)
   }
 
 }
