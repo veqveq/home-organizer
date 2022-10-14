@@ -1,10 +1,11 @@
 package ru.veqveq.backend.model.entity;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.FieldNameConstants;
+import ru.veqveq.backend.model.AuditorAwareEntity;
 
 import javax.persistence.*;
 import java.util.*;
@@ -14,15 +15,18 @@ import java.util.*;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 @FieldNameConstants
-public class Dictionary {
+@ToString(callSuper = true)
+public class Dictionary extends AuditorAwareEntity {
     @Id
     @GeneratedValue
     private UUID id;
 
     @Column(name = "name")
     private String name;
+
+    @Column(name = "description")
+    private String description;
 
     @Column(name = "es_index_name")
     @GeneratedValue

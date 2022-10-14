@@ -11,14 +11,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 import ru.veqveq.backend.dto.dictionary.DictionaryDto;
-import ru.veqveq.backend.dto.dictionary.DictionaryFieldDto;
 import ru.veqveq.backend.dto.dictionary.DictionaryMainPageDto;
 import ru.veqveq.backend.mapper.DictionaryMapper;
-import ru.veqveq.backend.model.entity.Dictionary;
+import ru.veqveq.backend.model.AuditorAwareEntity;
 import ru.veqveq.backend.service.DictionaryService;
 
 import javax.validation.Valid;
-import java.util.Set;
 import java.util.UUID;
 
 @Tag(name = "Контроллер справочников")
@@ -42,7 +40,7 @@ public class DictionaryController {
     @PageableAsQueryParam
     public Page<DictionaryMainPageDto> findAll(
             @Parameter(hidden = true)
-            @PageableDefault(sort = {Dictionary.Fields.name}, direction = Sort.Direction.ASC) Pageable pageable) {
+            @PageableDefault(sort = {AuditorAwareEntity.Fields.createStamp}, direction = Sort.Direction.DESC) Pageable pageable) {
         return service.getRegistry(pageable);
     }
 
