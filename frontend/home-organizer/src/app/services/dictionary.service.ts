@@ -1,7 +1,7 @@
 import {Injectable} from "@angular/core";
 import {HttpClient, HttpErrorResponse, HttpParams} from "@angular/common/http";
 import {Dictionary} from "../models/dictionary";
-import {catchError, concatMap, delay, map, Observable, retry, tap, throwError} from "rxjs";
+import {catchError, concatMap, map, Observable, retry, tap, throwError} from "rxjs";
 import {Page} from "../models/page";
 import {ErrorService} from "./error.service";
 
@@ -47,6 +47,13 @@ export class DictionaryService {
       concatMap(() => this.getAll()),
       catchError(this.handleError.bind(this))
     ).subscribe()
+  }
+
+  getById(id: string): Observable<Dictionary> {
+    return this.http.get<Dictionary>(this.ROOT_API + '/' + id)
+      .pipe(
+        catchError(this.handleError.bind(this))
+      )
   }
 
   private handleError(error: HttpErrorResponse) {
