@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.veqveq.backend.dto.dictionary.DictionaryDto;
 import ru.veqveq.backend.dto.dictionary.DictionaryFieldDto;
 import ru.veqveq.backend.dto.dictionary.DictionaryMainPageDto;
+import ru.veqveq.backend.mapper.DictionaryMapper;
 import ru.veqveq.backend.model.entity.Dictionary;
 import ru.veqveq.backend.service.DictionaryService;
 
@@ -26,6 +27,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class DictionaryController {
     private final DictionaryService service;
+    private final DictionaryMapper mapper;
 
     @PostMapping
     @Operation(summary = "Сохранить справочник")
@@ -44,12 +46,12 @@ public class DictionaryController {
         return service.getRegistry(pageable);
     }
 
-    @GetMapping("/{uuid}/fields")
-    @Operation(summary = "Получить поля справочника по идентификатору")
-    public Set<DictionaryFieldDto> getFields(
+    @GetMapping("/{uuid}")
+    @Operation(summary = "Получить справочник по идентификатору")
+    public DictionaryDto getById(
             @Parameter(description = "Идентификатор справочника")
             @PathVariable(name = "uuid") UUID uuid) {
-        return service.getFields(uuid);
+        return mapper.toDto(service.getById(uuid));
     }
 
     @PutMapping("/{uuid}")
