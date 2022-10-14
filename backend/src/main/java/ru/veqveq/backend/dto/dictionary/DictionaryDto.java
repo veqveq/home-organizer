@@ -21,6 +21,9 @@ public class DictionaryDto {
     @Schema(description = "Название справочника")
     private String name;
 
+    @Schema(description = "Описание справочника")
+    private String description;
+
     @NotEmpty(message = "Список полей справочника не должен быть пустым")
     @ToString.Exclude
     @Schema(description = "Список полей справочника")

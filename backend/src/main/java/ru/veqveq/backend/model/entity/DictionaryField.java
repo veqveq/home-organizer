@@ -1,9 +1,10 @@
 package ru.veqveq.backend.model.entity;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
+import ru.veqveq.backend.model.AuditorAwareEntity;
 import ru.veqveq.backend.model.enumerated.DictionaryFieldType;
 
 import javax.persistence.*;
@@ -14,8 +15,8 @@ import java.util.UUID;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
-public class DictionaryField {
+@ToString(callSuper = true)
+public class DictionaryField extends AuditorAwareEntity {
     @Id
     @GeneratedValue
     private UUID id;

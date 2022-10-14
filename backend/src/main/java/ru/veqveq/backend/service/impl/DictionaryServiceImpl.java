@@ -7,7 +7,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.veqveq.backend.dto.dictionary.DictionaryDto;
-import ru.veqveq.backend.dto.dictionary.DictionaryFieldDto;
 import ru.veqveq.backend.dto.dictionary.DictionaryMainPageDto;
 import ru.veqveq.backend.exception.HoException;
 import ru.veqveq.backend.exception.HoNotFoundException;
@@ -18,9 +17,7 @@ import ru.veqveq.backend.repo.DictionaryRepo;
 import ru.veqveq.backend.service.DictionaryService;
 import ru.veqveq.backend.service.ElasticsearchService;
 
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -43,16 +40,6 @@ public class DictionaryServiceImpl implements DictionaryService {
         esService.initIndex(dictionary);
         log.info("Saving dictionary {} successful", dto.toString());
         return dictionary.getId();
-    }
-
-    @Override
-    public Set<DictionaryFieldDto> getFields(UUID uuid) {
-        Dictionary dictionary = dictionaryRepo.findById(uuid)
-                .orElseThrow(() -> new HoNotFoundException(String.format("Справочник с id %s не найден", uuid)));
-        return dictionary.getFields()
-                .stream()
-                .map(fieldMapper::toDto)
-                .collect(Collectors.toSet());
     }
 
     @Override
