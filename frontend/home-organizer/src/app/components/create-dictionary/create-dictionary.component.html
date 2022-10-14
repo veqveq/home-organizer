@@ -21,6 +21,15 @@
     Короткое название. {{name.value.length}}/3 символов
   </p>
 
+  <input
+    [ngClass]="name.errors != null ? 'border-2 border-red-500':''"
+    type="text"
+    class="border w-full py-2 px-4 mb-2 rounded"
+    placeholder="Описание справочника справочника"
+    formControlName="description"
+    appFocus
+  />
+
   <ng-template appRef></ng-template>
 
   <div class="px-2 py-2 mb-4 grid justify-items-stretch">

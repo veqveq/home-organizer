@@ -5,7 +5,7 @@ import {Dictionary} from "../../models/dictionary";
 import {ModalService} from "../../services/modal.service";
 import {CreateDictionaryFieldComponent} from "../create-dictionary-field/create-dictionary-field.component";
 import {RefDirective} from "../../directives/ref.directive";
-import {concatMap, tap} from "rxjs";
+import {concatMap} from "rxjs";
 
 @Component({
   selector: 'app-create-dictionary',
@@ -21,6 +21,7 @@ export class CreateDictionaryComponent {
         Validators.minLength(3)
       ]
     }],
+    description: [''],
     fields: this.builder.array([])
   })
 
