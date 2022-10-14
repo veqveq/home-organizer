@@ -1,5 +1,7 @@
 <h1 class="text-center font-bold text-lg mb-4">Справочник: "{{dictionary.name}}"</h1>
-<p class="text-center mb-6">Описание</p>
+<p
+  [ngClass]="!dictionary.description?'italic':''"
+  class="text-center mb-6">{{dictionary.description?dictionary.description:'Описание не добавлено'}}</p>
 <hr class="mb-6"/>
 
 <table class="w-full">
