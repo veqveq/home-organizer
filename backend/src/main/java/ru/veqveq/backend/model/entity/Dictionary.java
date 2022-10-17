@@ -33,7 +33,7 @@ public class Dictionary extends AuditorAwareEntity {
     private UUID esIndexName;
 
     @OneToMany(mappedBy = "dictionary", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<DictionaryField> fields = new HashSet<>();
+    private List<DictionaryField> fields = new ArrayList<>();
 
     public void setFields(Set<DictionaryField> fields) {
         getFields().clear();

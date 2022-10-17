@@ -37,7 +37,7 @@ public class DictionaryField extends AuditorAwareEntity {
     @Column(name = "default_value")
     private String defaultValue;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dictionary_id")
     private Dictionary dictionary;
 }
