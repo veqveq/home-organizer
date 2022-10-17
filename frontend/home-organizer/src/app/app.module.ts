@@ -13,7 +13,6 @@ import {CreateDictionaryComponent} from './components/create-dictionary/create-d
 import {FocusDirective} from './directives/focus.directive';
 import {CreateDictionaryFieldComponent} from './components/create-dictionary-field/create-dictionary-field.component';
 import {DictionaryRegisterComponent} from './pages/dictionary-register/dictionary-register.component';
-import {HomeComponent} from './pages/home/home.component';
 import {RefDirective} from "./directives/ref.directive";
 import {DictionaryPageComponent} from './pages/dictionary-page/dictionary-page.component';
 
@@ -29,7 +28,6 @@ import {DictionaryPageComponent} from './pages/dictionary-page/dictionary-page.c
     RefDirective,
     CreateDictionaryFieldComponent,
     DictionaryRegisterComponent,
-    HomeComponent,
     DictionaryPageComponent
   ],
   imports: [
