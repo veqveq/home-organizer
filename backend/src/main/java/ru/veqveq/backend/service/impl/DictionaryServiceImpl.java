@@ -7,10 +7,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.veqveq.backend.dto.dictionary.DictionaryDto;
-import ru.veqveq.backend.dto.dictionary.DictionaryMainPageDto;
 import ru.veqveq.backend.exception.HoException;
 import ru.veqveq.backend.exception.HoNotFoundException;
-import ru.veqveq.backend.mapper.DictionaryFieldMapper;
 import ru.veqveq.backend.mapper.DictionaryMapper;
 import ru.veqveq.backend.model.entity.Dictionary;
 import ru.veqveq.backend.repo.DictionaryRepo;
@@ -26,7 +24,6 @@ import java.util.UUID;
 public class DictionaryServiceImpl implements DictionaryService {
     private final DictionaryRepo dictionaryRepo;
     private final DictionaryMapper dictionaryMapper;
-    private final DictionaryFieldMapper fieldMapper;
     private final ElasticsearchService esService;
 
     @Override
@@ -49,9 +46,9 @@ public class DictionaryServiceImpl implements DictionaryService {
     }
 
     @Override
-    public Page<DictionaryMainPageDto> getRegistry(Pageable pageable) {
+    public Page<DictionaryDto> getRegistry(Pageable pageable) {
         return dictionaryRepo.findAll(pageable)
-                .map(dictionaryMapper::toMainPageDto);
+                .map(dictionaryMapper::toDto);
     }
 
     @Override

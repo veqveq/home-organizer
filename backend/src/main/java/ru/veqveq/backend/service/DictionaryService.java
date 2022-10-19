@@ -3,7 +3,6 @@ package ru.veqveq.backend.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import ru.veqveq.backend.dto.dictionary.DictionaryDto;
-import ru.veqveq.backend.dto.dictionary.DictionaryMainPageDto;
 import ru.veqveq.backend.model.entity.Dictionary;
 
 import java.util.UUID;
@@ -13,7 +12,7 @@ public interface DictionaryService {
 
     Dictionary getById(UUID uuid);
 
-    Page<DictionaryMainPageDto> getRegistry(Pageable pageable);
+    Page<DictionaryDto> getRegistry(Pageable pageable);
 
     DictionaryDto update(UUID uuid, DictionaryDto dto);
 

@@ -11,7 +11,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 import ru.veqveq.backend.dto.dictionary.DictionaryDto;
-import ru.veqveq.backend.dto.dictionary.DictionaryMainPageDto;
 import ru.veqveq.backend.mapper.DictionaryMapper;
 import ru.veqveq.backend.model.AuditorAwareEntity;
 import ru.veqveq.backend.service.DictionaryService;
@@ -38,7 +37,7 @@ public class DictionaryController {
     @GetMapping
     @Operation(summary = "Получить реестр справочников")
     @PageableAsQueryParam
-    public Page<DictionaryMainPageDto> findAll(
+    public Page<DictionaryDto> findAll(
             @Parameter(hidden = true)
             @PageableDefault(sort = {AuditorAwareEntity.Fields.createStamp}, direction = Sort.Direction.DESC) Pageable pageable) {
         return service.getRegistry(pageable);
@@ -57,7 +56,7 @@ public class DictionaryController {
     public DictionaryDto update(@Parameter(description = "Идентификатор справочника")
                                 @PathVariable UUID uuid,
                                 @Parameter(description = "Справочник")
-                                @RequestBody DictionaryDto dto) {
+                                @Valid @RequestBody DictionaryDto dto) {
         return service.update(uuid, dto);
     }
 
