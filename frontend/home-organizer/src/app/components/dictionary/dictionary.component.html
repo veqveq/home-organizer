@@ -7,7 +7,7 @@
   >{{ dictionary.name }}</a>
   <div class="py-4 px-6">
     <button
-      (click)="modalService.open()"
+      (click)="createModal.open()"
       class="transition ease-in-out bg-amber-600 hover:-translate-y-1 hover:scale-110  hover:bg-amber-300 duration-300 h-[50px] w-[50px] border px-2 py-2 mr-5 rounded-full text-white">
       Edit
     </button>
@@ -18,3 +18,8 @@
     </button>
   </div>
 </div>
+<app-modal
+  #createModal
+  title="Изменение справочника: '{{dictionary.name}}'">
+  <app-dictionary-editor [dictionary]="dictionary" [visible$]="createModal.visible$"></app-dictionary-editor>
+</app-modal>

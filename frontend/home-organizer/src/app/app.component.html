@@ -1,6 +1,10 @@
 <app-global-error></app-global-error>
-<div class="max-w-2xl container mx-auto pt-5">
-
+<div class="max-w-2xl container mx-auto pt-5 flex flex-row">
+  <div class="w-1/6 bg-blue-200 h-full flex flex-col px-2 py-4">
+    <h1 class="font-bold mb-2 text-center text-lg">Меню</h1>
+    <span>
+      <a routerLinkActive="text-white" [routerLinkActiveOptions]="{exact: true}" routerLink="/dictionaries">Справочники</a>
+    </span>
+  </div>
   <router-outlet></router-outlet>
-
 </div>

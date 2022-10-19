@@ -1,13 +1,23 @@
-import {Component, Input, OnInit} from '@angular/core';
-import {ModalService} from "../../services/modal.service";
+import {Component, Input, OnInit, Output} from '@angular/core';
+import {BehaviorSubject} from "rxjs";
 
 @Component({
   selector: 'app-modal',
   templateUrl: './modal.component.html',
 })
 export class ModalComponent {
-
   @Input() title: string
-  constructor(public modalService: ModalService) { }
 
+  public visible$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false)
+
+  constructor() {
+  }
+
+  public open() {
+    this.visible$.next(true)
+  }
+
+  public close() {
+    this.visible$.next(false)
+  }
 }

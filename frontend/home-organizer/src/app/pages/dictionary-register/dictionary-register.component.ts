@@ -1,6 +1,5 @@
 import {Component, OnInit} from '@angular/core';
 import {DictionaryService} from "../../services/dictionary.service";
-import {ModalService} from "../../services/modal.service";
 
 @Component({
   selector: 'app-dictionary-register',
@@ -13,8 +12,7 @@ export class DictionaryRegisterComponent implements OnInit {
   dictionaryFilter = ''
 
   constructor(
-    public dictionaryService: DictionaryService,
-    public modalService: ModalService
+    public dictionaryService: DictionaryService
   ) {
   }
 

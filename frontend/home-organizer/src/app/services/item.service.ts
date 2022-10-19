@@ -1,7 +1,7 @@
 import {Injectable} from "@angular/core";
-import {map, Observable, retry, tap} from "rxjs";
+import {catchError, map, Observable, retry, tap, throwError} from "rxjs";
 import {Page} from "../models/page";
-import {HttpClient, HttpParams} from "@angular/common/http";
+import {HttpClient, HttpErrorResponse, HttpParams} from "@angular/common/http";
 import {ErrorService} from "./error.service";
 import {DictionaryItem} from "../models/dictionary-item";
 
@@ -25,11 +25,28 @@ export class ItemService {
           size: 10
         }
       })
-      // , responseType: 'json'
     }).pipe(
-      tap(val=>console.log(val)),
       map(response => response.content),
       retry(2)
     )
+  }
+
+  create(dictionaryId: string, item: DictionaryItem): Observable<string> {
+    return this.http.post<string>(this.ROOT_API + '/' + dictionaryId, item)
+      .pipe(
+        catchError(this.handleError.bind(this))
+      )
+  }
+
+  delete(dictionaryId: string, itemId: string) {
+    return this.http.delete(this.ROOT_API + '/' + dictionaryId + '/' + itemId)
+      .pipe(
+        catchError(this.handleError.bind(this))
+      )
+  }
+
+  private handleError(error: HttpErrorResponse) {
+    this.errorService.handle(error.error.message)
+    return throwError(() => error.message)
   }
 }
