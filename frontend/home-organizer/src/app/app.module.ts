@@ -9,12 +9,13 @@ import {GlobalErrorComponent} from './components/global-error/global-error.compo
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {DictionaryFilterPipe} from './pipes/dictionary-filter.pipe';
 import {ModalComponent} from "./components/modal/modal.component";
-import {CreateDictionaryComponent} from './components/create-dictionary/create-dictionary.component';
+import {DictionaryEditorComponent} from './components/dictionary-editor/dictionary-editor.component';
 import {FocusDirective} from './directives/focus.directive';
-import {CreateDictionaryFieldComponent} from './components/create-dictionary-field/create-dictionary-field.component';
+import {CreateDictionaryFieldComponent} from './components/dictionary-field-editor/dictionary-field-editor.component';
 import {DictionaryRegisterComponent} from './pages/dictionary-register/dictionary-register.component';
 import {RefDirective} from "./directives/ref.directive";
 import {DictionaryPageComponent} from './pages/dictionary-page/dictionary-page.component';
+import { DictionaryItemEditorComponent } from './components/dictionary-item-editor/dictionary-item-editor.component';
 
 @NgModule({
   declarations: [
@@ -23,12 +24,13 @@ import {DictionaryPageComponent} from './pages/dictionary-page/dictionary-page.c
     GlobalErrorComponent,
     DictionaryFilterPipe,
     ModalComponent,
-    CreateDictionaryComponent,
+    DictionaryEditorComponent,
     FocusDirective,
     RefDirective,
     CreateDictionaryFieldComponent,
     DictionaryRegisterComponent,
-    DictionaryPageComponent
+    DictionaryPageComponent,
+    DictionaryItemEditorComponent
   ],
   imports: [
     BrowserModule,

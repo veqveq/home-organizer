@@ -25,23 +25,32 @@ export class DictionaryPageComponent implements OnInit {
     this.route.params.subscribe((params: Params) => {
       this.dictionaryService.getById(params.id).subscribe(dic => {
         this.dictionary = dic
-        if (dic.id) {
-          this.setItems(dic.id)
-        }
+        this.setItems()
       })
     })
   }
 
-  private setItems(id: string): void {
-    this.itemService.getAll(id)
-      .subscribe(items => {
-        this.items = items
-      })
+  public setItems(): void {
+    console.log('!!!SET')
+    if (this.dictionary.id) {
+      this.itemService.getAll(this.dictionary.id)
+        .subscribe(items => {
+          this.items = items
+        })
+    }
   }
 
   public getValue(fld: DictionaryField, item: DictionaryItem): any {
-    if (fld.id){
-      return  JSON.parse(JSON.stringify(item.fieldValues))[fld.id]
+    if (fld.id) {
+      return JSON.parse(JSON.stringify(item.fieldValues))[fld.id]
+    }
+  }
+
+  delete(itemId: string) {
+    if (this.dictionary.id) {
+      const ID = this.dictionary.id
+      this.itemService.delete(ID, itemId)
+        .subscribe(() => this.items = this.items.filter(item => item.id != itemId))
     }
   }
 }

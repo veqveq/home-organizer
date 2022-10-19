@@ -42,6 +42,13 @@ export class DictionaryService {
       )
   }
 
+  update(dictionaryId: string, dictionary: Dictionary): Observable<Dictionary> {
+    return this.http.put<Dictionary>(this.ROOT_API + '/' + dictionaryId, dictionary)
+      .pipe(
+        catchError(this.handleError.bind(this))
+      )
+  }
+
   delete(dictionary: Dictionary) {
     this.http.delete(this.ROOT_API + '/' + dictionary.id).pipe(
       concatMap(() => this.getAll()),

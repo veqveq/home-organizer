@@ -1,4 +1,8 @@
+import {TSMap} from "typescript-map";
+
 export interface DictionaryItem {
   id: string,
-  fieldValues: object
+
+  dictionaryId?: string
+  fieldValues: TSMap<string, any>
 }

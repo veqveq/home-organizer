@@ -1,0 +1,9 @@
+<div [ngSwitch]="fld.type" *ngFor="let fld of fields">
+  <p>{{fld.name}}</p>
+  <input *ngSwitchCase="'Text'" type="text" #inp (input)="item.fieldValues.set(fld.id?fld.id:'',inp.value)">
+  <input *ngSwitchCase="'Long'" type="number" #inp (input)="item.fieldValues.set(fld.id?fld.id:'',inp.value)">
+  <input *ngSwitchCase="'Double'" type="number" #inp (input)="item.fieldValues.set(fld.id?fld.id:'',inp.value)">
+  <input *ngSwitchCase="'Boolean'" type="checkbox" #inp (input)="item.fieldValues.set(fld.id?fld.id:'',inp.checked)">
+  <input *ngSwitchCase="'Date'" type="date" #inp (input)="item.fieldValues.set(fld.id?fld.id:'',inp.value)">
+</div>
+<button (click)="save()">Сохранить</button>

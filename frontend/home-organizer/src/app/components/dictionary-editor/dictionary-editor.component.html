@@ -22,7 +22,6 @@
   </p>
 
   <textarea
-    [ngClass]="name.errors != null ? 'border-2 border-red-500':''"
     class="border w-full py-2 px-4 mb-2 rounded"
     placeholder="Описание справочника"
     formControlName="description"
@@ -42,9 +41,31 @@
 
   <hr class="mb-4">
 
-  <button
-    type="submit"
-    class="rounded py-2 px-4 bg-blue-500 text-white hover:bg-blue-700">
-    Сохранить
-  </button>
+  <div [ngSwitch]="dictionary != null" class="px-4">
+    <div *ngSwitchCase="false" class="flex justify-between">
+      <button type="submit"
+              class="rounded py-2 px-4 bg-blue-500 text-white hover:bg-blue-700">
+        Сохранить
+      </button>
+      <button
+        type="button"
+        class="rounded py-2 px-4 bg-red-500 text-white hover:bg-red-700"
+        (click)="close(); clean()"
+      >Отмена
+      </button>
+    </div>
+    <div *ngSwitchCase="true" class="flex justify-between">
+      <button type="button"
+              (click)="update()"
+              class="rounded py-2 px-4 bg-blue-500 text-white hover:bg-blue-700">
+        Обновить
+      </button>
+      <button
+        type="button"
+        class="rounded py-2 px-4 bg-red-500 text-white hover:bg-red-700"
+        (click)="close()"
+      >Отмена
+      </button>
+    </div>
+  </div>
 </form>
