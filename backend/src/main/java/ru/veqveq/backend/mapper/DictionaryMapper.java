@@ -3,7 +3,6 @@ package ru.veqveq.backend.mapper;
 import org.mapstruct.*;
 import org.springframework.util.CollectionUtils;
 import ru.veqveq.backend.dto.dictionary.DictionaryDto;
-import ru.veqveq.backend.dto.dictionary.DictionaryMainPageDto;
 import ru.veqveq.backend.model.entity.Dictionary;
 
 import java.util.Objects;
@@ -12,8 +11,6 @@ import java.util.UUID;
 @Mapper(uses = {DictionaryFieldMapper.class})
 public interface DictionaryMapper {
     DictionaryDto toDto(Dictionary entity);
-
-    DictionaryMainPageDto toMainPageDto(Dictionary entity);
 
     @Mapping(target = "id", ignore = true)
     Dictionary toEntity(DictionaryDto dto, UUID esIndexName);
