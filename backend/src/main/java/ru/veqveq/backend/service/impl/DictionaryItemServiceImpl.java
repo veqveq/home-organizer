@@ -27,6 +27,7 @@ import ru.veqveq.backend.model.DictionaryItemFilter;
 import ru.veqveq.backend.model.entity.Dictionary;
 import ru.veqveq.backend.service.DictionaryItemService;
 import ru.veqveq.backend.service.DictionaryService;
+import ru.veqveq.backend.service.ElasticsearchService;
 import ru.veqveq.backend.util.ElasticUtils;
 
 import javax.validation.Valid;
@@ -46,6 +47,7 @@ public class DictionaryItemServiceImpl implements DictionaryItemService {
     private final DictionaryService dictionaryService;
     private final RestHighLevelClient client;
     private final DictionaryItemMapper mapper;
+    private final ElasticsearchService esService;
 
     @Override
     public UUID saveItem(@Valid SaveDictionaryItemDto dto) {
@@ -57,6 +59,7 @@ public class DictionaryItemServiceImpl implements DictionaryItemService {
             request.source(dto.getFieldValues());
             request.id(id.toString());
             client.index(request, RequestOptions.DEFAULT);
+            esService.refreshIndex(dictionary.getEsIndexName());
             log.info("Saving item {} successful", dto.toString());
             return id;
         } catch (IOException e) {
@@ -113,6 +116,7 @@ public class DictionaryItemServiceImpl implements DictionaryItemService {
             UpdateRequest request = new UpdateRequest(dictionary.getEsIndexName(), dto.getId().toString());
             request.doc(dto.getFieldValues());
             client.update(request, RequestOptions.DEFAULT);
+            esService.refreshIndex(dictionary.getEsIndexName());
             log.info("Updating item {} successful", dto.toString());
             return mapper.toGetDto(dto);
         } catch (IOException e) {
@@ -130,6 +134,7 @@ public class DictionaryItemServiceImpl implements DictionaryItemService {
             DeleteRequest request = new DeleteRequest(dictionary.getEsIndexName());
             request.id(uuid.toString());
             client.delete(request, RequestOptions.DEFAULT);
+            esService.refreshIndex(dictionary.getEsIndexName());
             log.info("Deleting item {} from index {} successful", uuid, dictId);
         } catch (IOException e) {
             log.info("Deleting item {} from index {} failed", uuid, dictId);
