@@ -8,7 +8,8 @@ import {DictionaryField} from "../../models/dictionary-field";
 
 @Component({
   selector: 'app-dictionary-page',
-  templateUrl: './dictionary-page.component.html'
+  templateUrl: './dictionary-page.component.html',
+  styleUrls:['./dictionary-page.component.css']
 })
 export class DictionaryPageComponent implements OnInit {
   dictionary: Dictionary
@@ -25,19 +26,9 @@ export class DictionaryPageComponent implements OnInit {
     this.route.params.subscribe((params: Params) => {
       this.dictionaryService.getById(params.id).subscribe(dic => {
         this.dictionary = dic
-        this.setItems()
+        this.itemService.getAll(params.id).subscribe(items => this.items = items)
       })
     })
-  }
-
-  public setItems(): void {
-    console.log('!!!SET')
-    if (this.dictionary.id) {
-      this.itemService.getAll(this.dictionary.id)
-        .subscribe(items => {
-          this.items = items
-        })
-    }
   }
 
   public getValue(fld: DictionaryField, item: DictionaryItem): any {
@@ -50,7 +41,7 @@ export class DictionaryPageComponent implements OnInit {
     if (this.dictionary.id) {
       const ID = this.dictionary.id
       this.itemService.delete(ID, itemId)
-        .subscribe(() => this.items = this.items.filter(item => item.id != itemId))
+        .subscribe(() => this.itemService.getAll(ID).subscribe(items => this.items = items))
     }
   }
 }

@@ -8,47 +8,57 @@
   <table class="w-full">
     <tr>
       <td *ngFor="let field of dictionary.fields;"
-          class="px-4 py-2 border text-center font-bold bg-blue-600 text-white"
-          [ngClass]="[field.required?'bg-amber-300':'',
-        field.unique?'bg-red-600':'',
-        field.unique && field.required?'bg-gradient-to-l from-amber-300 to-red-600':''
-        ]"
-      >
+          class="px-4 py-2 border text-center font-bold text-white"
+          [ngClass]="field.unique && field.required
+          ?'bg-gradient-to-l from-amber-600 to-red-600'
+          :field.required
+            ?'bg-amber-600'
+            :field.unique
+              ?'bg-red-600'
+              :'bg-blue-600'">
         {{field.name}}</td>
     </tr>
-    <tr class="flex-row" *ngFor="let item of items">
+    <tr class="transition ease-in-out hover:scale-110 flex-row hover:bg-blue-3 hover:cursor-pointer"
+        *ngFor="let item of items">
       <td *ngFor="let field of dictionary.fields"
-          class="px-4 py-2 border text-center grow"
-          [ngClass]="[field.required?'font-bold':'']">
+          (click)="itemEditor.existedItem = item; updateModal.open()"
+          class="table-data px-4 py-2 border text-center grow"
+          [ngClass]="[field.required?'font-bold':'',field.unique?'italic':'']">
+        <span *ngIf="field.type != 'Boolean'">
         {{getValue(field, item)}}
+        </span>
+        <input *ngIf="field.type == 'Boolean'" type="checkbox" disabled [checked]="getValue(field,item)"/>
       </td>
-      <td class="pl-4">
-        <button
-          class="transition ease-in-out bg-amber-600 hover:-translate-y-1 hover:scale-110  hover:bg-amber-300 duration-300 h-[50px] w-[50px] border px-2 py-2 mr-5 rounded-full text-white">
-          Edit
-        </button>
+      <td class="btn-col">
         <button
           (click)="delete(item.id)"
-          class="transition ease-in-out bg-red-600 hover:-translate-y-1 hover:scale-110  hover:bg-red-300 duration-300 h-[50px] w-[50px] border px-2 py-2 mr-5 rounded-full text-white">
-          Del
+          class="btn px-2 py-2 bg-white rounded-r-2xl text-white text-xl font-bold">
+          &times;
         </button>
       </td>
     </tr>
+
     <button
       (click)="createModal.open()"
       class="w-[60px] h-[60px] font-bold rounded-full bg-red-700 text-white fixed right-5 bottom-5 py-4 px-4 hover:bg-red-300">
       +
     </button>
-    <app-modal
-      #createModal
-      title="Новая запись в справочник '{{dictionary.name}}'"
-    >
-      <app-dictionary-item-editor
-        [fields]="dictionary.fields"
-        [dictionary]="dictionary"
-      ></app-dictionary-item-editor>
-    </app-modal>
+
   </table>
 
   <p *ngIf="items && items.length==0">Нет записей</p>
 </div>
+
+<app-modal #createModal title="Новая запись в справочнике '{{dictionary.name}}'">
+  <app-dictionary-item-editor
+    [visible$]="createModal.visible$"
+    [page]="this"
+  ></app-dictionary-item-editor>
+</app-modal>
+
+<app-modal #updateModal title="Изменение записи в справочнике '{{dictionary.name}}'">
+  <app-dictionary-item-editor #itemEditor
+                              [visible$]="updateModal.visible$"
+                              [page]="this"
+  ></app-dictionary-item-editor>
+</app-modal>

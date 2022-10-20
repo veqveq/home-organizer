@@ -1,9 +1,50 @@
-<div [ngSwitch]="fld.type" *ngFor="let fld of fields">
-  <p>{{fld.name}}</p>
-  <input *ngSwitchCase="'Text'" type="text" #inp (input)="item.fieldValues.set(fld.id?fld.id:'',inp.value)">
-  <input *ngSwitchCase="'Long'" type="number" #inp (input)="item.fieldValues.set(fld.id?fld.id:'',inp.value)">
-  <input *ngSwitchCase="'Double'" type="number" #inp (input)="item.fieldValues.set(fld.id?fld.id:'',inp.value)">
-  <input *ngSwitchCase="'Boolean'" type="checkbox" #inp (input)="item.fieldValues.set(fld.id?fld.id:'',inp.checked)">
-  <input *ngSwitchCase="'Date'" type="date" #inp (input)="item.fieldValues.set(fld.id?fld.id:'',inp.value)">
+<div class="mb-4" [ngSwitch]="fld.type" *ngFor="let fld of page.dictionary.fields" xmlns:getExistedFieldValue>
+  <div class="flex mb-2 px-2">
+    <h3 class="grow font-bold text-lg">{{fld.name}}</h3>
+    <p *ngIf="fld.required" class="text-xl font-bold text-red-500">R</p>
+    <p *ngIf="fld.unique" class="text-xl font-bold text-amber-500">U</p>
+  </div>
+  <input
+    class="input w-full border rounded-2xl p-2 mb-2"
+    appRef *ngSwitchCase="'Text'" type="text" #inp (input)="item.fieldValues.set(fld.id?fld.id:'',inp.value)"
+    [placeholder]="fld.defaultValue?fld.defaultValue+'(по умолчанию)':'Текст...'"
+    (click)="setDefaultValue(inp,fld.defaultValue?fld.defaultValue:'')"
+    [value]="getExistedFieldValue(fld.id?fld.id:'')">
+  <input
+    class="input w-full border rounded-2xl p-2 mb-2"
+    appRef *ngSwitchCase="'Long'" type="number" #inp (input)="item.fieldValues.set(fld.id?fld.id:'',inp.value)"
+    [placeholder]="fld.defaultValue?fld.defaultValue+'(по умолчанию)':'Целое число...'"
+    (click)="setDefaultValue(inp,fld.defaultValue?fld.defaultValue:'')"
+    [value]="getExistedFieldValue(fld.id?fld.id:'')">
+  <input
+    class="input w-full border rounded-2xl p-2 mb-2"
+    appRef *ngSwitchCase="'Double'" type="number" #inp (input)="item.fieldValues.set(fld.id?fld.id:'',inp.value)"
+    [placeholder]="fld.defaultValue?fld.defaultValue+'(по умолчанию)':'Дробное число...'"
+    (click)="setDefaultValue(inp,fld.defaultValue?fld.defaultValue:'')"
+    [value]="getExistedFieldValue(fld.id?fld.id:'')">
+  <input
+    class="input mb-2"
+    appRef *ngSwitchCase="'Boolean'" type="checkbox" #inp (input)="item.fieldValues.set(fld.id?fld.id:'',inp.checked)"
+    [checked]="getExistedFieldValue(fld.id?fld.id:'')
+              ?getExistedFieldValue(fld.id?fld.id:'')
+              :fld.defaultValue">
+  <input
+    class="input w-full border rounded-2xl p-2 mb-2"
+    appRef *ngSwitchCase="'Date'" type="date" #inp (input)="item.fieldValues.set(fld.id?fld.id:'',inp.value)"
+    [placeholder]="fld.defaultValue?fld.defaultValue+'(по умолчанию)':'Дата'"
+    (click)="setDefaultValue(inp,fld.defaultValue?fld.defaultValue:'')"
+    [value]="getExistedFieldValue(fld.id?fld.id:'')">
 </div>
-<button (click)="save()">Сохранить</button>
+
+<hr class="mb-4">
+
+<div class="px-4" [ngSwitch]="existedItem == null">
+  <div class="flex justify-between" *ngSwitchCase="true">
+    <button class="rounded py-2 px-4 bg-blue-500 text-white hover:bg-blue-700" (click)="save()">Сохранить</button>
+    <button class="rounded py-2 px-4 bg-red-500 text-white hover:bg-red-700" (click)="close();clean()">Отмена</button>
+  </div>
+  <div class="flex justify-between" *ngSwitchCase="false">
+    <button class="rounded py-2 px-4 bg-blue-500 text-white hover:bg-blue-700" (click)="update()">Обновить</button>
+    <button class="rounded py-2 px-4 bg-red-500 text-white hover:bg-red-700" (click)="close()">Отмена</button>
+  </div>
+</div>
