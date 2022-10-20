@@ -12,20 +12,6 @@ import {DictionaryField} from "../../models/dictionary-field";
   templateUrl: './dictionary-editor.component.html'
 })
 export class DictionaryEditorComponent implements OnInit {
-  ngOnInit(): void {
-    if (this.dictionary) {
-      this.form.controls.name.setValue(this.dictionary.name)
-      this.form.controls.description.setValue(this.dictionary.description ? this.dictionary.description : '')
-      // this.form.controls.fields.setValue(this.dictionary.fields)
-      this.dictionary.fields.forEach(fld => {
-        this.addExistedField(fld)
-        // const field = this.refDir.containerRef.createComponent(CreateDictionaryFieldComponent)
-        console.log(fld)
-        // field.instance.field = fld
-      })
-    }
-  }
-
   @ViewChild(RefDirective, {static: true}) refDir: RefDirective
   @Input() visible$: BehaviorSubject<boolean>
   @Input() dictionary: Dictionary
@@ -41,18 +27,28 @@ export class DictionaryEditorComponent implements OnInit {
     fields: this.builder.array([])
   })
 
+  constructor(
+    private dictionaryService: DictionaryService,
+    private builder: FormBuilder
+  ) {
+  }
+
+  ngOnInit(): void {
+    if (this.dictionary) {
+      this.form.controls.name.setValue(this.dictionary.name)
+      this.form.controls.description.setValue(this.dictionary.description ? this.dictionary.description : '')
+      this.dictionary.fields.forEach(fld => {
+        this.addExistedField(fld)
+      })
+    }
+  }
+
   get name() {
     return this.form.controls.name as FormControl
   }
 
   get fields() {
     return this.form.controls.fields as FormArray
-  }
-
-  constructor(
-    private dictionaryService: DictionaryService,
-    private builder: FormBuilder
-  ) {
   }
 
   create() {

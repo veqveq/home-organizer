@@ -1,18 +1,18 @@
-import {Component, Input, OnInit, Output} from '@angular/core';
-import {DictionaryField} from "../../models/dictionary-field";
-import {Dictionary} from "../../models/dictionary";
+import {Component, Input, OnInit, ViewChild} from '@angular/core';
 import {DictionaryItem} from "../../models/dictionary-item";
 import {ItemService} from "../../services/item.service";
 import {TSMap} from "typescript-map";
-import {concatMap, delay} from "rxjs";
+import {BehaviorSubject, concatMap, delay, Observable, tap} from "rxjs";
+import {DictionaryPageComponent} from "../../pages/dictionary-page/dictionary-page.component";
 
 @Component({
   selector: 'app-dictionary-item-editor',
   templateUrl: './dictionary-item-editor.component.html'
 })
 export class DictionaryItemEditorComponent implements OnInit {
-  @Input() fields: DictionaryField[]
-  @Input() dictionary: Dictionary
+  @Input() visible$: BehaviorSubject<boolean>
+  @Input() page: DictionaryPageComponent
+  @Input() existedItem: DictionaryItem
 
   item: DictionaryItem = new class implements DictionaryItem {
     fieldValues: TSMap<string, any> = new TSMap();
@@ -24,17 +24,67 @@ export class DictionaryItemEditorComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.item.dictionaryId = this.dictionary.id
+    if (this.existedItem) {
+      this.item.id = this.existedItem.id
+      this.item.dictionaryId = this.existedItem.dictionaryId
+      this.item.fieldValues = new TSMap<string, any>().fromJSON(JSON.parse(JSON.stringify(this.existedItem.fieldValues)))
+    } else {
+      this.item.dictionaryId = this.page.dictionary.id
+    }
   }
 
   save() {
-    if (this.dictionary.id) {
-      const ID = this.dictionary.id
+    if (this.page.dictionary.id) {
+      const ID = this.page.dictionary.id
       this.itemService.create(ID, this.item)
-        .pipe(
-          // delay(500),
-          concatMap(() => this.itemService.getAll(ID)))
-        .subscribe()
+        .subscribe(() => {
+          this.itemService.getAll(ID)
+            .subscribe(items => this.page.items = items)
+          this.close()
+          this.clean()
+        })
+    }
+  }
+
+  update() {
+    if (this.page.dictionary.id) {
+      const ID = this.page.dictionary.id
+      if (this.existedItem.id) {
+        this.itemService.update(ID, this.existedItem.id, this.item)
+          .subscribe(() => {
+            this.itemService.getAll(ID)
+              .subscribe(items => this.page.items = items)
+            this.close()
+          })
+      }
+    }
+  }
+
+  close() {
+    this.visible$.next(false)
+  }
+
+  clean() {
+    let col = document.getElementsByClassName('input') as HTMLCollectionOf<HTMLInputElement>
+    Array.from(col).forEach(el => el.value = '')
+    this.item = new class implements DictionaryItem {
+      fieldValues: TSMap<string, any> = new TSMap();
+      dictionaryId: string;
+      id: string;
+    };
+  }
+
+  getExistedFieldValue(fieldId: string) {
+    let val = ''
+    if (this.existedItem) {
+      val = JSON.parse(JSON.stringify(this.existedItem.fieldValues))[fieldId]
+    }
+    return val == undefined ? '' : val
+  }
+
+  setDefaultValue(inp: HTMLInputElement, defaultValue: string) {
+    if (inp.value == '' && defaultValue != '') {
+      inp.value = defaultValue
     }
   }
 }

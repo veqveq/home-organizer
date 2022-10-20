@@ -38,6 +38,13 @@ export class ItemService {
       )
   }
 
+  update(dictionaryId: string, itemId: string, item: DictionaryItem) {
+    return this.http.put(this.ROOT_API + '/' + dictionaryId + '/' + itemId, item)
+      .pipe(
+        catchError(this.handleError.bind(this))
+      )
+  }
+
   delete(dictionaryId: string, itemId: string) {
     return this.http.delete(this.ROOT_API + '/' + dictionaryId + '/' + itemId)
       .pipe(
