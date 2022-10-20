@@ -3,6 +3,7 @@ package ru.veqveq.backend.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
+import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -95,10 +96,24 @@ public class ElasticsearchService {
                 log.error("Index {} is not acknowledged", dictionary.getEsIndexName());
                 throw new HoException(String.format("Не удалось удалить индекс словаря '%s'", dictionary.getName()));
             }
+            log.info("ES index: {} deleted", dictionary.getEsIndexName());
         } catch (IOException e) {
             log.error("ES index delete error: {}", e.getMessage());
             throw new HoException(String.format("Не удалось удалить индекс словаря '%s'. Message: [%s]",
                     dictionary.getName(), e.getMessage()));
+        }
+    }
+
+    public void refreshIndex(String indexName) {
+        log.info("Refresh index {} has started", indexName);
+        try {
+            RefreshRequest refreshRequest = new RefreshRequest(indexName);
+            esClient.indices().refresh(refreshRequest, RequestOptions.DEFAULT);
+            log.info("ES index: {} refreshed", indexName);
+        } catch (IOException e) {
+            log.error("ES index refresh error: {}", e.getMessage());
+            throw new HoException(String.format("Не удалось обновить индекс '%s'. Message: [%s]",
+                    indexName, e.getMessage()));
         }
     }
 
