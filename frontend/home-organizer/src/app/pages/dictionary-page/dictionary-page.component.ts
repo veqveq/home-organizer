@@ -8,8 +8,7 @@ import {DictionaryField} from "../../models/dictionary-field";
 
 @Component({
   selector: 'app-dictionary-page',
-  templateUrl: './dictionary-page.component.html',
-  styleUrls:['./dictionary-page.component.css']
+  templateUrl: './dictionary-page.component.html'
 })
 export class DictionaryPageComponent implements OnInit {
   dictionary: Dictionary
