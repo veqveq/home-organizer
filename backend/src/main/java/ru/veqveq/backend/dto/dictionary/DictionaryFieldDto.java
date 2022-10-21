@@ -6,6 +6,7 @@ import ru.veqveq.backend.model.enumerated.DictionaryFieldType;
 
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.UUID;
@@ -15,6 +16,11 @@ import java.util.UUID;
 public class DictionaryFieldDto {
     @Schema(hidden = true)
     private UUID id;
+
+    @NotNull(message = "У элемента не указана позиция")
+    @Min(value = 0, message = "Некорректная позиция поля в таблице")
+    @Schema(description = "Позиция поля в таблице")
+    private Integer position;
 
     @NotBlank(message = "Не указано название поля")
     @Schema(description = "Имя поля")

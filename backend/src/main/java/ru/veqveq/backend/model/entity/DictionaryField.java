@@ -28,6 +28,9 @@ public class DictionaryField extends AuditorAwareEntity {
     @Column(name = "type")
     private DictionaryFieldType type;
 
+    @Column(name = "position")
+    private Integer position;
+
     @Column(name = "unique_value")
     private Boolean unique;
 

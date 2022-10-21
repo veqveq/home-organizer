@@ -1,6 +1,9 @@
 package ru.veqveq.backend.mapper;
 
-import org.mapstruct.*;
+import org.mapstruct.AfterMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.springframework.util.CollectionUtils;
 import ru.veqveq.backend.dto.dictionary.DictionaryDto;
 import ru.veqveq.backend.model.entity.Dictionary;
@@ -26,11 +29,11 @@ public interface DictionaryMapper {
         }
     }
 
-    @BeforeMapping
-    default void sortFields(Dictionary source) {
+    @AfterMapping
+    default void sortFields(@MappingTarget DictionaryDto source) {
         source.getFields().sort((o1, o2) -> {
-            if (Objects.nonNull(o1.getCreateStamp()) && Objects.nonNull(o2.getCreateStamp())) {
-                return o2.getCreateStamp().compareTo(o1.getCreateStamp());
+            if (Objects.nonNull(o1.getPosition()) && Objects.nonNull(o2.getPosition())) {
+                return o1.getPosition().compareTo(o2.getPosition());
             }
             return 0;
         });
