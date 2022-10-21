@@ -15,7 +15,7 @@
 
 <h1 class="text-center text-lg" *ngIf="loading">Loading...</h1>
 
-<div *ngIf="dictionaryService.dictionaries">
+<div *ngIf="dictionaryService.dictionaries" class="min-w-[700px] ">
   <app-dictionary
     *ngFor="let dictionary of dictionaryService.dictionaries | dictionaryFilter:dictionaryFilter "
     [dictionary]="dictionary">

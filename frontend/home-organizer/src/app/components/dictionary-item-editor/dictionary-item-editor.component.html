@@ -8,19 +8,19 @@
     class="input w-full border rounded-2xl p-2 mb-2"
     appRef *ngSwitchCase="'Text'" type="text" #inp (input)="item.fieldValues.set(fld.id?fld.id:'',inp.value)"
     [placeholder]="fld.defaultValue?fld.defaultValue+'(по умолчанию)':'Текст...'"
-    (click)="setDefaultValue(inp,fld.defaultValue?fld.defaultValue:'')"
+    (click)="setDefaultValue(inp,fld.defaultValue?fld.defaultValue:'', fld.id?fld.id:'')"
     [value]="getExistedFieldValue(fld.id?fld.id:'')">
   <input
     class="input w-full border rounded-2xl p-2 mb-2"
     appRef *ngSwitchCase="'Long'" type="number" #inp (input)="item.fieldValues.set(fld.id?fld.id:'',inp.value)"
     [placeholder]="fld.defaultValue?fld.defaultValue+'(по умолчанию)':'Целое число...'"
-    (click)="setDefaultValue(inp,fld.defaultValue?fld.defaultValue:'')"
+    (click)="setDefaultValue(inp,fld.defaultValue?fld.defaultValue:'', fld.id?fld.id:'')"
     [value]="getExistedFieldValue(fld.id?fld.id:'')">
   <input
     class="input w-full border rounded-2xl p-2 mb-2"
     appRef *ngSwitchCase="'Double'" type="number" #inp (input)="item.fieldValues.set(fld.id?fld.id:'',inp.value)"
     [placeholder]="fld.defaultValue?fld.defaultValue+'(по умолчанию)':'Дробное число...'"
-    (click)="setDefaultValue(inp,fld.defaultValue?fld.defaultValue:'')"
+    (click)="setDefaultValue(inp,fld.defaultValue?fld.defaultValue:'', fld.id?fld.id:'')"
     [value]="getExistedFieldValue(fld.id?fld.id:'')">
   <input
     class="input mb-2"
@@ -32,7 +32,7 @@
     class="input w-full border rounded-2xl p-2 mb-2"
     appRef *ngSwitchCase="'Date'" type="date" #inp (input)="item.fieldValues.set(fld.id?fld.id:'',inp.value)"
     [placeholder]="fld.defaultValue?fld.defaultValue+'(по умолчанию)':'Дата'"
-    (click)="setDefaultValue(inp,fld.defaultValue?fld.defaultValue:'')"
+    (click)="setDefaultValue(inp,fld.defaultValue?fld.defaultValue:'', fld.id?fld.id:'')"
     [value]="getExistedFieldValue(fld.id?fld.id:'')">
 </div>
 

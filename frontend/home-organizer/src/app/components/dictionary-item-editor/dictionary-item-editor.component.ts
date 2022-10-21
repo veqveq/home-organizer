@@ -82,9 +82,10 @@ export class DictionaryItemEditorComponent implements OnInit {
     return val == undefined ? '' : val
   }
 
-  setDefaultValue(inp: HTMLInputElement, defaultValue: string) {
+  setDefaultValue(inp: HTMLInputElement, defaultValue: string, fldId: string) {
     if (inp.value == '' && defaultValue != '') {
       inp.value = defaultValue
+      this.item.fieldValues.set(fldId,defaultValue)
     }
   }
 }

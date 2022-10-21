@@ -1,5 +1,5 @@
-import {Component, Input, OnInit, ViewChild} from '@angular/core';
-import {FormArray, FormBuilder, FormControl, Validators} from "@angular/forms";
+import {Component, Input, OnInit, ViewChild, ViewRef} from '@angular/core';
+import {FormArray, FormBuilder, FormControl, FormGroup, Validators} from "@angular/forms";
 import {DictionaryService} from "../../services/dictionary.service";
 import {Dictionary} from "../../models/dictionary";
 import {CreateDictionaryFieldComponent} from "../dictionary-field-editor/dictionary-field-editor.component";
@@ -34,9 +34,14 @@ export class DictionaryEditorComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.setDicValues()
+  }
+
+  private setDicValues() {
     if (this.dictionary) {
       this.form.controls.name.setValue(this.dictionary.name)
       this.form.controls.description.setValue(this.dictionary.description ? this.dictionary.description : '')
+      this.refDir.containerRef.clear()
       this.dictionary.fields.forEach(fld => {
         this.addExistedField(fld)
       })
@@ -63,19 +68,19 @@ export class DictionaryEditorComponent implements OnInit {
   addField() {
     const field = this.refDir.containerRef.createComponent(CreateDictionaryFieldComponent)
     field.instance.component = this
-    field.instance.index = this.fields.length
+    field.instance.form.controls.position.setValue(this.fields.length)
     this.fields.push(field.instance.form)
   }
 
   addExistedField(fld: DictionaryField) {
     const field = this.refDir.containerRef.createComponent(CreateDictionaryFieldComponent)
     field.instance.component = this
-    field.instance.index = this.fields.length
     field.instance.field = fld
     this.fields.push(field.instance.form)
   }
 
-  deleteField(index: number) {
+  deleteField(form: FormGroup) {
+    let index = this.fields.controls.indexOf(form)
     this.refDir.containerRef.remove(index)
     this.fields.removeAt(index)
   }
@@ -83,11 +88,13 @@ export class DictionaryEditorComponent implements OnInit {
 
   clean() {
     this.form.reset()
+    this.form.controls.fields.clear()
     this.refDir.containerRef.clear()
   }
 
   close() {
     this.visible$.next(false)
+    this.setDicValues()
   }
 
   update() {
@@ -97,6 +104,43 @@ export class DictionaryEditorComponent implements OnInit {
         .subscribe(() => {
           this.close()
         })
+    }
+  }
+
+  up(form: FormGroup) {
+    let index = this.fields.controls.indexOf(form)
+    if (index > 0) {
+      let upperIndex = index - 1
+
+      let element = this.fields.controls.at(index) as FormControl
+      let upperElement = this.fields.controls.at(upperIndex) as FormControl
+      element.value.position = upperIndex
+      upperElement.value.position = index
+
+      this.fields.removeAt(index)
+      this.fields.insert(upperIndex, element)
+
+      let view = this.refDir.containerRef.get(index) as ViewRef
+      this.refDir.containerRef.move(view, upperIndex)
+    }
+  }
+
+  down(form: FormGroup) {
+    let index = this.fields.controls.indexOf(form)
+    if (index < this.fields.length - 1) {
+      console.log(index, '->', this.fields.length)
+      let lowerIndex = index + 1
+
+      let element = this.fields.controls.at(index) as FormControl
+      let upperElement = this.fields.controls.at(lowerIndex) as FormControl
+      element.value.position = lowerIndex
+      upperElement.value.position = index
+
+      this.fields.removeAt(index)
+      this.fields.insert(lowerIndex, element)
+
+      let view = this.refDir.containerRef.get(index) as ViewRef
+      this.refDir.containerRef.move(view, lowerIndex)
     }
   }
 }

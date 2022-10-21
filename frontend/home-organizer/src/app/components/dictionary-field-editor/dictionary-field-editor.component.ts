@@ -8,14 +8,14 @@ import {DictionaryEditorComponent} from "../dictionary-editor/dictionary-editor.
   selector: 'app-create-field',
   templateUrl: './dictionary-field-editor.component.html'
 })
-export class CreateDictionaryFieldComponent implements OnInit{
+export class CreateDictionaryFieldComponent implements OnInit {
 
   @Input('field') field?: DictionaryField
   types = Object.entries(FieldType).map(([key, value]) => ({id: key, value: value}))
-  index: number
   component: DictionaryEditorComponent
   form = new FormGroup({
     id: new FormControl<string>(''),
+    position: new FormControl<number>(-1),
     name: new FormControl<string>('', Validators.required),
     type: new FormControl<string>('', Validators.required),
     required: new FormControl<boolean>(false),
@@ -27,11 +27,12 @@ export class CreateDictionaryFieldComponent implements OnInit{
   }
 
   ngOnInit(): void {
-    if (this.field){
-      this.form.controls.id.setValue(this.field.id? this.field.id: '')
+    if (this.field) {
+      this.form.controls.id.setValue(this.field.id ? this.field.id : '')
+      this.form.controls.position.setValue(this.field.position)
       this.form.controls.name.setValue(this.field.name)
       this.form.controls.type.setValue(this.field.type)
-      this.form.controls.required.setValue(this.field.required?this.field.required : false)
+      this.form.controls.required.setValue(this.field.required ? this.field.required : false)
       this.form.controls.unique.setValue(this.field?.unique ? this.field.unique : false)
       this.form.controls.defaultValue.setValue(this.field?.defaultValue ? this.field.defaultValue : '')
     }
@@ -53,11 +54,23 @@ export class CreateDictionaryFieldComponent implements OnInit{
     return this.form.controls.defaultValue as FormControl
   }
 
+  get position() {
+    return this.form.controls.position.value as number
+  }
+
   get(): DictionaryField {
     return <DictionaryField>this.form.value
   }
 
   deleteComponent() {
-    this.component.deleteField(this.index)
+    this.component.deleteField(this.form)
+  }
+
+  left() {
+    this.component.up(this.form)
+  }
+
+  right() {
+    this.component.down(this.form)
   }
 }
