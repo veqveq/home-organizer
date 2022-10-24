@@ -4,6 +4,8 @@ import {Page} from "../models/page";
 import {HttpClient, HttpErrorResponse, HttpParams} from "@angular/common/http";
 import {ErrorService} from "./error.service";
 import {DictionaryItem} from "../models/dictionary-item";
+import {ItemFilter} from "../models/item-filter";
+import {Dictionary} from "../models/dictionary";
 
 @Injectable({
   providedIn: 'root'
@@ -17,13 +19,14 @@ export class ItemService {
   ) {
   }
 
-  getAll(dictionaryId: string): Observable<DictionaryItem[]> {
-    return this.http.get<Page<DictionaryItem>>(this.ROOT_API + '/' + dictionaryId, {
+  filter(dictionaryId: string, filter: ItemFilter, sort: string[]): Observable<DictionaryItem[]> {
+    return this.http.post<Page<DictionaryItem>>(this.ROOT_API + '/' + dictionaryId + '/filter', filter, {
       params: new HttpParams({
         fromObject: {
+          sort: sort,
           page: 0,
           size: 10
-        }
+        },
       })
     }).pipe(
       map(response => response.content),
