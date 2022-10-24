@@ -24,7 +24,8 @@ export class DictionaryItemEditorComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    if (this.existedItem) {
+    if (this.existedItem != null) {
+      console.log(this.existedItem)
       this.item.id = this.existedItem.id
       this.item.dictionaryId = this.existedItem.dictionaryId
       this.item.fieldValues = new TSMap<string, any>().fromJSON(JSON.parse(JSON.stringify(this.existedItem.fieldValues)))
@@ -38,7 +39,7 @@ export class DictionaryItemEditorComponent implements OnInit {
       const ID = this.page.dictionary.id
       this.itemService.create(ID, this.item)
         .subscribe(() => {
-          this.itemService.getAll(ID)
+          this.itemService.filter(ID, this.page.filter, this.page.getSortParam())
             .subscribe(items => this.page.items = items)
           this.close()
           this.clean()
@@ -52,7 +53,7 @@ export class DictionaryItemEditorComponent implements OnInit {
       if (this.existedItem.id) {
         this.itemService.update(ID, this.existedItem.id, this.item)
           .subscribe(() => {
-            this.itemService.getAll(ID)
+            this.itemService.filter(ID,this.page.filter, this.page.getSortParam())
               .subscribe(items => this.page.items = items)
             this.close()
           })
@@ -85,7 +86,7 @@ export class DictionaryItemEditorComponent implements OnInit {
   setDefaultValue(inp: HTMLInputElement, defaultValue: string, fldId: string) {
     if (inp.value == '' && defaultValue != '') {
       inp.value = defaultValue
-      this.item.fieldValues.set(fldId,defaultValue)
+      this.item.fieldValues.set(fldId, defaultValue)
     }
   }
 }
