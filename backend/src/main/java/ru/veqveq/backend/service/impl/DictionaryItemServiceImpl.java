@@ -78,14 +78,15 @@ public class DictionaryItemServiceImpl implements DictionaryItemService {
     public Page<OutputDictionaryItemDto> filter(UUID dictId, DictionaryItemFilter filter, Pageable pageable) {
         log.info("Elasticsearch filtering by criteria {} has started", filter);
         Dictionary dictionary = dictionaryService.getById(dictId);
+        List<String> textFields = ElasticUtils.getTextFields(dictionary, UUID::toString);
         try {
             SearchRequest searchRequest = new SearchRequest(dictionary.getEsIndexName());
             SearchSourceBuilder builder = new SearchSourceBuilder();
 
             if (Objects.nonNull(filter)) {
                 BoolQueryBuilder queryBuilder = new BoolQueryBuilder();
-                ElasticUtils.addCommonFilters(queryBuilder, dictionary, filter.getCommonFilters());
-                ElasticUtils.addFieldFilters(queryBuilder, filter.getFieldFilters());
+                ElasticUtils.addCommonFilters(queryBuilder, dictionary, filter.getCommonFilter());
+                ElasticUtils.addFieldFilters(queryBuilder, dictionary, filter.getFieldFilters());
                 builder.query(queryBuilder);
                 builder.highlighter(ElasticUtils.addHighlight(dictionary, filter));
             }
@@ -93,12 +94,18 @@ public class DictionaryItemServiceImpl implements DictionaryItemService {
             builder.from(pageable.getPageNumber() * pageable.getPageSize());
             builder.size(pageable.getPageSize());
             pageable.getSort().stream()
-                    .forEach(order -> builder.sort(order.getProperty(), SortOrder.valueOf(order.getDirection().name())));
+                    .forEach(order -> {
+                        String sortProperty = order.getProperty();
+                        if (textFields.contains(sortProperty)) {
+                            sortProperty = sortProperty.concat(".raw");
+                        }
+                        builder.sort(sortProperty, SortOrder.valueOf(order.getDirection().name()));
+                    });
 
             searchRequest.source(builder);
             SearchResponse response = client.search(searchRequest, RequestOptions.DEFAULT);
             List<OutputDictionaryItemDto> items = Arrays.stream(response.getHits().getHits())
-                    .map(hit -> new OutputDictionaryItemDto(UUID.fromString(hit.getId()), hit.getSourceAsMap()))
+                    .map(ElasticUtils::getHitValue)
                     .collect(Collectors.toList());
             log.info("Elasticsearch filtering by criteria {} successful. Found {} items", filter, items.size());
             return new PageImpl<>(items, pageable, response.getHits().getTotalHits().value);

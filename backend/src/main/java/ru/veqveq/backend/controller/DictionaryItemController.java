@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 import ru.veqveq.backend.dto.item.OutputDictionaryItemDto;
@@ -36,22 +35,13 @@ public class DictionaryItemController {
         return service.saveItem(dto);
     }
 
-    @GetMapping
-    @Operation(summary = "Получить все записи")
-    @PageableAsQueryParam
-    public Page<OutputDictionaryItemDto> findAll(@Parameter(description = "Идентификатор справочника")
-                                                 @PathVariable(name = "dictId") UUID dictId,
-                                                 @Parameter(hidden = true)
-                                                 @PageableDefault(sort = "_id", direction = Sort.Direction.ASC) Pageable pageable) {
-        return service.findAll(dictId, pageable);
-    }
-
-    @GetMapping("/filter")
+    @PostMapping("/filter")
     @Operation(summary = "Фильтр")
     @PageableAsQueryParam
     public Page<OutputDictionaryItemDto> filter(@Parameter(description = "Идентификатор справочника")
                                                 @PathVariable(name = "dictId") UUID dictId,
-                                                @Parameter(description = "Фраза для поиска") DictionaryItemFilter filter,
+                                                @Parameter(description = "Фраза для поиска")
+                                                @RequestBody DictionaryItemFilter filter,
                                                 @Parameter(hidden = true)
                                                 @PageableDefault Pageable pageable) {
         return service.filter(dictId, filter, pageable);

@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import ru.veqveq.backend.exception.HoException;
 import ru.veqveq.backend.model.entity.Dictionary;
 import ru.veqveq.backend.model.entity.DictionaryField;
+import ru.veqveq.backend.model.enumerated.DictionaryFieldType;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -51,12 +52,23 @@ public class ElasticsearchService {
             for (DictionaryField field : dictionary.getFields()) {
                 builder.startObject(field.getId().toString());
                 builder.field("type", field.getType().name().toLowerCase());
+                if (field.getType() == DictionaryFieldType.Text) {
+                    builder.field("term_vector", "with_positions_offsets");
+                    builder.field("analyzer", "index_ngram_analyzer");
+                    builder.field("search_analyzer", "search_term_analyzer");
+                    builder.startObject("fields");
+                    builder.startObject("raw");
+                    builder.field("type", "keyword");
+                    builder.endObject();
+                    builder.endObject();
+                }
                 builder.endObject();
             }
             builder.endObject();
             builder.endObject();
 
             request.mapping(builder);
+            request.settings(generateSettings());
 
             CreateIndexResponse response = esClient.indices().create(request, RequestOptions.DEFAULT);
             if (!response.isAcknowledged()) {
@@ -69,6 +81,37 @@ public class ElasticsearchService {
             throw new HoException(String.format("Не удалось создать индекс для словаря '%s'. Message: [%s]",
                     dictionary.getName(), e.getMessage()));
         }
+    }
+
+    private XContentBuilder generateSettings() throws IOException {
+        XContentBuilder builder = XContentFactory.jsonBuilder();
+        return builder.startObject()
+                .startObject("index")
+                .field("max_ngram_diff", 15)
+                .endObject()
+                .startObject("analysis")
+                .startObject("tokenizer")
+                .startObject("ngram_tokenizer")
+                .field("type", "nGram")
+                .field("min_gram", 1)
+                .field("max_gram", 15)
+                .field("token_chars", new String[]{"letter", "digit", "punctuation", "symbol", "whitespace"})
+                .endObject()
+                .endObject()
+                .startObject("analyzer")
+                .startObject("index_ngram_analyzer")
+                .field("type", "custom")
+                .field("tokenizer", "ngram_tokenizer")
+                .field("filter", new String[]{"lowercase"})
+                .endObject()
+                .startObject("search_term_analyzer")
+                .field("type", "custom")
+                .field("tokenizer", "keyword")
+                .field("filter", "lowercase")
+                .endObject()
+                .endObject()
+                .endObject()
+                .endObject();
     }
 
     public void migrateIndex(String sourceIndex, String targetIndex) {
