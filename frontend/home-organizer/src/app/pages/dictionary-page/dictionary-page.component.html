@@ -5,10 +5,21 @@
     class="text-center mb-6">{{dictionary.description ? dictionary.description : 'Описание не добавлено'}}</p>
   <hr class="mb-6"/>
 
-  <p>Фильтр</p>
-  <input type="text" class="w-full" [(ngModel)]="filter.commonFilter" (input)="doFilter()"/>
+  <div class="relative">
+    <input
+      #commonFilter
+      type="text"
+      class="mb-2 border rounded py-2 px-4 pr-8 w-full mb-4 transition ease-in-out duration-500"
+      placeholder="Общий поиск..."
+      [ngClass]="commonFilter.value!=''?'bg-blue-200 rounded border-2 border-black':''"
+      [(ngModel)]="filter.commonFilter" (input)="doFilter()"/>
+    <button *ngIf="commonFilter.value !=''"
+            (click)="commonFilter.value=''; filter.commonFilter='';doFilter()"
+            class="absolute right-3 top-1 text-2xl font-bold text-red-600">&times;
+    </button>
+  </div>
 
-  <table class="w-full">
+  <table class="w-full table-auto">
     <tr>
       <td *ngFor="let field of dictionary.fields;"
           class="px-4 py-2 border text-center font-bold text-white min-w-[200px]"
@@ -22,17 +33,30 @@
         <div
           (click)="changeSort(field.id?field.id:'')"
           class="relative cursor-pointer">
-            <span>{{field.name}}</span>
+          <span>{{field.name}}</span>
           <p class="absolute top-0 right-0" [innerHTML]="getSortElement(field.id?field.id:'')"></p>
           <p>Фильтр</p>
         </div>
-        <input #ff type="text" class="w-full text-black" (input)="ff.value == ''
-        ?filter.fieldFilters.delete(field.id?field.id:'')
-        :filter.fieldFilters.set(field.id?field.id:'',ff.value);doFilter()"/>
+        <div
+          class="relative">
+          <input #fieldFilter
+                 type="text"
+                 class="w-full border rounded text-black py-1 px-4 pr-6 transition ease-in-out duration-500"
+                 [ngClass]="fieldFilter.value!=''?'bg-blue-200 rounded border-2 border-black':''"
+                 (input)="fieldFilter.value == ''
+                    ?filter.fieldFilters.delete(field.id?field.id:'')
+                    :filter.fieldFilters.set(field.id?field.id:'',fieldFilter.value)
+                 ;doFilter()"/>
+          <button *ngIf="fieldFilter.value !=''"
+                  (click)="fieldFilter.value=''; filter.fieldFilters.delete(field.id?field.id:'');doFilter()"
+                  class="absolute top-0.5 right-4 text-xl font-bold text-red-600">&times;
+          </button>
+        </div>
       </td>
     </tr>
+
     <tr
-      class="group transition ease-in-out hover:scale-110 flex-row hover:bg-blue-3 hover:cursor-pointer odd:bg-white even:bg-slate-50"
+      class="group hover:bg-opacity-0 transition ease-in-out hover:translate-x-4 hover:scale-[1.03] flex-row hover:bg-blue-3 hover:cursor-pointer odd:bg-white even:bg-slate-50"
       *ngFor="let item of items">
       <td *ngFor="let field of dictionary.fields"
           (click)="itemEditor.existedItem = item; updateModal.open()"
@@ -41,7 +65,7 @@
         <span *ngIf="field.type != 'Boolean'" [innerHTML]="getValue(field,item)"></span>
         <input *ngIf="field.type == 'Boolean'" type="checkbox" disabled [checked]="getValue(field,item)"/>
       </td>
-      <td class=" bg-white">
+      <td class="group-hover:bg-opacity-0 bg-white">
         <button
           (click)="delete(item.id)"
           class="group-hover:opacity-100 opacity-0 transition ease-in-out duration-300 btn px-2 py-2 bg-red-600 rounded-r-2xl text-white text-xl font-bold hover:bg-red-300">
@@ -58,7 +82,7 @@
 
   </table>
 
-  <p *ngIf="items && items.length==0">Нет записей</p>
+  <p class="mt-2 italic text-center" *ngIf="items && items.length==0">Нет записей</p>
 </div>
 
 <app-modal #createModal title="Новая запись в справочнике '{{dictionary.name}}'">

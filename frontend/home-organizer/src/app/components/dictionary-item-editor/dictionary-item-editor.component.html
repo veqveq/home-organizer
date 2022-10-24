@@ -5,6 +5,7 @@
     <p *ngIf="fld.unique" class="text-xl font-bold text-amber-500">U</p>
   </div>
   <input
+    required
     class="input w-full border rounded-2xl p-2 mb-2"
     appRef *ngSwitchCase="'Text'" type="text" #inp (input)="item.fieldValues.set(fld.id?fld.id:'',inp.value)"
     [placeholder]="fld.defaultValue?fld.defaultValue+'(по умолчанию)':'Текст...'"
