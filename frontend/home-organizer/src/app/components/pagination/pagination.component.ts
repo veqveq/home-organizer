@@ -24,11 +24,9 @@ export class PaginationComponent {
       if (this.currentPage <= 3) {
         start = 1
         end = 5 < this.page.totalPages ? 5 : this.page.totalPages
-        console.log('first')
       } else if (this.currentPage >= this.page.totalPages - 3) {
         start = this.page.totalPages - 4 > 0 ? this.page.totalPages - 4 : 0
         end = this.page.totalPages
-        console.log('second')
       } else {
         result.push(1)
         result.push(-1)
@@ -37,14 +35,11 @@ export class PaginationComponent {
         }
         result.push(-1)
         result.push(this.page.totalPages)
-        console.log('third')
-        console.log(result)
         return result
       }
       for (let i = start; i <= end; i++) {
         result.push(i)
       }
-      console.log(start, end, result)
       return result;
     }
     return []
