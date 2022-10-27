@@ -32,10 +32,6 @@ export class DictionaryRegisterComponent implements OnInit {
     this.getAll()
   }
 
-  received(){
-    console.log('received')
-  }
-
   getAll() {
     this.dictionaryService.getAll(this.page.number, this.page.size)
       .pipe(
