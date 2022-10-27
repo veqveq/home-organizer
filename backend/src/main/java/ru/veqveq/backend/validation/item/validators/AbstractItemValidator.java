@@ -4,22 +4,19 @@ import lombok.Setter;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
-import ru.veqveq.backend.dto.item.OutputDictionaryItemDto;
 import ru.veqveq.backend.dto.item.input.InputDictionaryItemDto;
-import ru.veqveq.backend.model.DictionaryItemFilter;
 import ru.veqveq.backend.model.entity.Dictionary;
 import ru.veqveq.backend.model.entity.DictionaryField;
 import ru.veqveq.backend.model.enumerated.DictionaryFieldType;
 import ru.veqveq.backend.service.DictionaryItemService;
 import ru.veqveq.backend.service.DictionaryService;
 import ru.veqveq.backend.service.ElasticsearchService;
+import ru.veqveq.backend.util.ElasticUtils;
 
 import javax.validation.ConstraintValidatorContext;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
@@ -48,7 +45,7 @@ public abstract class AbstractItemValidator<T extends InputDictionaryItemDto> {
                 .stream()
                 .collect(Collectors.toMap(fld -> fld.getId().toString(), Function.identity()));
 
-        valid = checkRequiredFieldsAndPutDefValues(item, context, fieldsMap);
+        valid = checkRequiredFields(item, context, fieldsMap);
 
         for (Map.Entry<String, Object> field : item.getFieldValues().entrySet()) {
             if (!checkFieldIsExist(field.getKey(), fieldsMap, context)) {
@@ -71,21 +68,13 @@ public abstract class AbstractItemValidator<T extends InputDictionaryItemDto> {
      * 1. Поле не заполнено и есть defaultValue -> добавляем в item.fieldValues поле defaultValue
      * 2. Поле не обязательное и нет defaultValue -> валидация валится
      */
-    private boolean checkRequiredFieldsAndPutDefValues(T item, ConstraintValidatorContext context, Map<String, DictionaryField> fieldsMap) {
+    private boolean checkRequiredFields(T item, ConstraintValidatorContext context, Map<String, DictionaryField> fieldsMap) {
         AtomicBoolean valid = new AtomicBoolean(true);
         fieldsMap.entrySet().stream()
-                .filter(fld -> fld.getValue().getRequired() && StringUtils.isNotBlank(fld.getValue().getDefaultValue()))
+                .filter(fld -> fld.getValue().getRequired() && !item.getFieldValues().containsKey(fld.getKey()))
                 .forEach(fld -> {
-                    if (!item.getFieldValues().containsKey(fld.getKey())) {
-                        if (StringUtils.isNotBlank(fld.getValue().getDefaultValue())) {
-                            setSafeDefaultFieldValue(item, fld.getValue());
-                        } else {
-                            if (BooleanUtils.isTrue(fld.getValue().getRequired())) {
-                                valid.set(false);
-                                addConstraintViolation(context, String.format("Обязательное поле [%s] не заполнено и не имеет значения по умолчанию", fld.getValue().getName()));
-                            }
-                        }
-                    }
+                    valid.set(false);
+                    addConstraintViolation(context, String.format("Обязательное поле [%s] не заполнено", fld.getValue().getName()));
                 });
         return valid.get();
     }
@@ -105,9 +94,14 @@ public abstract class AbstractItemValidator<T extends InputDictionaryItemDto> {
      * Проверка уникальности поля в индексе Elasticsearch
      */
     private boolean checkUniqueField(DictionaryField fieldScheme, Dictionary dictionary, T item, String name, Object value, ConstraintValidatorContext context) {
-        if (BooleanUtils.isTrue(fieldScheme.getUnique()) && !isUniqueField(item, dictionary, name, value)) {
-            addConstraintViolation(context, String.format("Значение [%s:%s] не уникально", fieldScheme.getName(), value));
-            return false;
+        if (BooleanUtils.isTrue(fieldScheme.getUnique())) {
+            if (fieldScheme.getType() == DictionaryFieldType.Text) {
+                name = StringUtils.joinWith(".",name, ElasticUtils.RAW_INDEX_FIELD_PREFIX);
+            }
+            if (!isUniqueField(item, dictionary, name, value)) {
+                addConstraintViolation(context, String.format("Значение [%s:%s] не уникально", fieldScheme.getName(), value));
+                return false;
+            }
         }
         return true;
     }
@@ -123,30 +117,6 @@ public abstract class AbstractItemValidator<T extends InputDictionaryItemDto> {
             return false;
         }
         return true;
-    }
-
-    private void setSafeDefaultFieldValue(T item, DictionaryField field) {
-        Object defaultValue = field.getType().getMappingFunction().apply(field.getDefaultValue());
-        if (BooleanUtils.isTrue(field.getRequired()) && BooleanUtils.isTrue(field.getUnique()) && field.getType() == DictionaryFieldType.Text) {
-            String strDefValue = defaultValue.toString();
-            DictionaryItemFilter filter = new DictionaryItemFilter();
-            filter.setFieldFilters(Map.of(field.getId().toString(), defaultValue));
-            List<OutputDictionaryItemDto> existedDefValues = itemService.filter(field.getDictionary().getId(), filter, PageRequest.ofSize(10000)).getContent();
-            if (!existedDefValues.isEmpty()) {
-                Integer maxNumber = existedDefValues.stream()
-                        .map(outputDto -> outputDto.getFieldValues().get(field.getId().toString()).toString())
-                        .filter(str -> str.matches(".+\\(\\d+\\)"))
-                        .map(str -> {
-                            String[] parts = str.split("-");
-                            return parts[parts.length - 1].replaceAll("[()]", "");
-                        })
-                        .mapToInt(Integer::parseInt)
-                        .max()
-                        .orElse(0) + 1;
-                defaultValue = String.format("%s-(%d)", strDefValue, maxNumber);
-            }
-        }
-        item.getFieldValues().put(field.getId().toString(), defaultValue);
     }
 
     private void addConstraintViolation(ConstraintValidatorContext context, String message) {

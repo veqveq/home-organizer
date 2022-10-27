@@ -9,6 +9,6 @@ import ru.veqveq.backend.validation.item.validators.AbstractItemValidator;
 public class SaveItemValidator extends AbstractItemValidator<SaveDictionaryItemDto> {
     @Override
     protected boolean isUniqueField(SaveDictionaryItemDto item, Dictionary dictionary, String fieldName, Object fieldValue) {
-        return esService.isUniqueFieldValue(dictionary.getEsIndexName(), fieldName, fieldValue);
+        return esService.isUniqueFieldValue(dictionary.getEsIndexName(), null, fieldName, fieldValue);
     }
 }

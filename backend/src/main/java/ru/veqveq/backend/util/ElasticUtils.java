@@ -19,6 +19,9 @@ import java.util.stream.Collectors;
 
 @UtilityClass
 public class ElasticUtils {
+    public static final String RAW_INDEX_FIELD_PREFIX = "raw";
+
+
     public void addCommonFilters(BoolQueryBuilder builder, Dictionary dictionary, String commonFilter) {
         String[] fieldNames = getTextFields(dictionary, UUID::toString).toArray(new String[0]);
         BoolQueryBuilder commonBuilder = new BoolQueryBuilder();

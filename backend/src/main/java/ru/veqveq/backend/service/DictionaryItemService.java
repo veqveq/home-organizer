@@ -13,11 +13,11 @@ import java.util.UUID;
 public interface DictionaryItemService {
     UUID saveItem(@Valid SaveDictionaryItemDto dto);
 
-    Page<OutputDictionaryItemDto> findAll(UUID dictId, Pageable pageable);
-
     Page<OutputDictionaryItemDto> filter(UUID dictId, DictionaryItemFilter filter, Pageable pageable);
 
     OutputDictionaryItemDto update(@Valid UpdateDictionaryItemDto dto);
 
     void delete(UUID dictId,UUID uuid);
+
+    boolean checkUnique(UUID dictionaryId, UUID itemId, UUID fieldId, Object fieldValue);
 }
