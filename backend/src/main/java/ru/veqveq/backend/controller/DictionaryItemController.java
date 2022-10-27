@@ -25,6 +25,19 @@ import java.util.UUID;
 public class DictionaryItemController {
     private final DictionaryItemService service;
 
+    @GetMapping("/is-unique")
+    @Operation(summary = "Проверка уникальности значения")
+    public Boolean checkUnique(@Parameter(description = "Идентификатор справочника")
+                               @PathVariable(name = "dictId") UUID dictId,
+                               @Parameter(description = "Идентификатор записи")
+                               @RequestParam(name = "itemId", required = false) UUID itemId,
+                               @Parameter(description = "Идентификатор поля")
+                               @RequestParam(name = "fieldId") UUID fieldId,
+                               @Parameter(description = "Значение поля")
+                               @RequestParam(name = "fieldValue") Object fieldValue) {
+        return service.checkUnique(dictId, itemId, fieldId, fieldValue);
+    }
+
     @PostMapping
     @Operation(summary = "Сохранить запись")
     public UUID save(@Parameter(description = "Идентификатор справочника")
@@ -40,7 +53,7 @@ public class DictionaryItemController {
     @PageableAsQueryParam
     public Page<OutputDictionaryItemDto> filter(@Parameter(description = "Идентификатор справочника")
                                                 @PathVariable(name = "dictId") UUID dictId,
-                                                @Parameter(description = "Фраза для поиска")
+                                                @Parameter(description = "Настройки фильтра")
                                                 @RequestBody DictionaryItemFilter filter,
                                                 @Parameter(hidden = true)
                                                 @PageableDefault Pageable pageable) {

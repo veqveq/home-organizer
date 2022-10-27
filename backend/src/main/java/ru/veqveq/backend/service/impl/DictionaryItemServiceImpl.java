@@ -2,11 +2,12 @@ package ru.veqveq.backend.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.action.update.UpdateRequest;
+import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -22,9 +23,12 @@ import ru.veqveq.backend.dto.item.OutputDictionaryItemDto;
 import ru.veqveq.backend.dto.item.input.impl.SaveDictionaryItemDto;
 import ru.veqveq.backend.dto.item.input.impl.UpdateDictionaryItemDto;
 import ru.veqveq.backend.exception.HoException;
+import ru.veqveq.backend.exception.HoNotFoundException;
 import ru.veqveq.backend.mapper.DictionaryItemMapper;
 import ru.veqveq.backend.model.DictionaryItemFilter;
 import ru.veqveq.backend.model.entity.Dictionary;
+import ru.veqveq.backend.model.entity.DictionaryField;
+import ru.veqveq.backend.model.enumerated.DictionaryFieldType;
 import ru.veqveq.backend.service.DictionaryItemService;
 import ru.veqveq.backend.service.DictionaryService;
 import ru.veqveq.backend.service.ElasticsearchService;
@@ -58,8 +62,8 @@ public class DictionaryItemServiceImpl implements DictionaryItemService {
             UUID id = UUID.randomUUID();
             request.source(dto.getFieldValues());
             request.id(id.toString());
+            request.setRefreshPolicy(WriteRequest.RefreshPolicy.WAIT_UNTIL);
             client.index(request, RequestOptions.DEFAULT);
-            esService.refreshIndex(dictionary.getEsIndexName());
             log.info("Saving item {} successful", dto.toString());
             return id;
         } catch (IOException e) {
@@ -67,11 +71,6 @@ public class DictionaryItemServiceImpl implements DictionaryItemService {
             throw new HoException(String.format("Ошибка при сохранении записи справочника [%s]: %s",
                     dto.toString(), e.getMessage()));
         }
-    }
-
-    @Override
-    public Page<OutputDictionaryItemDto> findAll(UUID dictId, Pageable pageable) {
-        return filter(dictId, null, pageable);
     }
 
     @Override
@@ -97,7 +96,7 @@ public class DictionaryItemServiceImpl implements DictionaryItemService {
                     .forEach(order -> {
                         String sortProperty = order.getProperty();
                         if (textFields.contains(sortProperty)) {
-                            sortProperty = sortProperty.concat(".raw");
+                            sortProperty = StringUtils.joinWith(".",sortProperty, ElasticUtils.RAW_INDEX_FIELD_PREFIX);
                         }
                         builder.sort(sortProperty, SortOrder.valueOf(order.getDirection().name()));
                     });
@@ -120,10 +119,11 @@ public class DictionaryItemServiceImpl implements DictionaryItemService {
         log.info("Updating item {} has started", dto.toString());
         try {
             Dictionary dictionary = dictionaryService.getById(dto.getDictionaryId());
-            UpdateRequest request = new UpdateRequest(dictionary.getEsIndexName(), dto.getId().toString());
-            request.doc(dto.getFieldValues());
-            client.update(request, RequestOptions.DEFAULT);
-            esService.refreshIndex(dictionary.getEsIndexName());
+            IndexRequest request = new IndexRequest(dictionary.getEsIndexName());
+            request.source(dto.getFieldValues());
+            request.id(dto.getId().toString());
+            request.setRefreshPolicy(WriteRequest.RefreshPolicy.WAIT_UNTIL);
+            client.index(request, RequestOptions.DEFAULT);
             log.info("Updating item {} successful", dto.toString());
             return mapper.toGetDto(dto);
         } catch (IOException e) {
@@ -140,13 +140,24 @@ public class DictionaryItemServiceImpl implements DictionaryItemService {
             Dictionary dictionary = dictionaryService.getById(dictId);
             DeleteRequest request = new DeleteRequest(dictionary.getEsIndexName());
             request.id(uuid.toString());
+            request.setRefreshPolicy(WriteRequest.RefreshPolicy.WAIT_UNTIL);
             client.delete(request, RequestOptions.DEFAULT);
-            esService.refreshIndex(dictionary.getEsIndexName());
             log.info("Deleting item {} from index {} successful", uuid, dictId);
         } catch (IOException e) {
             log.info("Deleting item {} from index {} failed", uuid, dictId);
             throw new HoException(String.format("Ошибка при удалении записи [%s] из справочника [%s]: %s",
                     uuid, dictId, e.getMessage()));
         }
+    }
+
+    @Override
+    public boolean checkUnique(UUID dictionaryId, UUID itemId, UUID fieldId, Object fieldValue) {
+        Dictionary dictionary = dictionaryService.getById(dictionaryId);
+        DictionaryField field = dictionary.getFields().stream().filter(fld -> fld.getId().equals(fieldId)).findFirst().orElseThrow(() -> new HoNotFoundException(String.format("Поле с id: %s не найдено", fieldId)));
+        String fieldName = fieldId.toString();
+        if (field.getType() == DictionaryFieldType.Text) {
+            fieldName = StringUtils.joinWith(".",fieldName, ElasticUtils.RAW_INDEX_FIELD_PREFIX);
+        }
+        return esService.isUniqueFieldValue(dictionary.getEsIndexName(), itemId, fieldName, fieldValue);
     }
 }

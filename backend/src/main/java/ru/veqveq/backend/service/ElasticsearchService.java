@@ -3,7 +3,6 @@ package ru.veqveq.backend.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
-import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -21,6 +20,7 @@ import ru.veqveq.backend.exception.HoException;
 import ru.veqveq.backend.model.entity.Dictionary;
 import ru.veqveq.backend.model.entity.DictionaryField;
 import ru.veqveq.backend.model.enumerated.DictionaryFieldType;
+import ru.veqveq.backend.util.ElasticUtils;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -57,7 +57,7 @@ public class ElasticsearchService {
                     builder.field("analyzer", "index_ngram_analyzer");
                     builder.field("search_analyzer", "search_term_analyzer");
                     builder.startObject("fields");
-                    builder.startObject("raw");
+                    builder.startObject(ElasticUtils.RAW_INDEX_FIELD_PREFIX);
                     builder.field("type", "keyword");
                     builder.endObject();
                     builder.endObject();
@@ -147,53 +147,24 @@ public class ElasticsearchService {
         }
     }
 
-    public void refreshIndex(String indexName) {
-        log.info("Refresh index {} has started", indexName);
-        try {
-            RefreshRequest refreshRequest = new RefreshRequest(indexName);
-            esClient.indices().refresh(refreshRequest, RequestOptions.DEFAULT);
-            log.info("ES index: {} refreshed", indexName);
-        } catch (IOException e) {
-            log.error("ES index refresh error: {}", e.getMessage());
-            throw new HoException(String.format("Не удалось обновить индекс '%s'. Message: [%s]",
-                    indexName, e.getMessage()));
-        }
-    }
-
     public boolean isUniqueFieldValue(@NotBlank String indexName,
-                                      @NotNull UUID itemId,
+                                      UUID itemId,
                                       @NotBlank String fieldName,
                                       @NotNull Object fieldValue) {
-        log.info("Index: {}. Item: {}. Checking field {}:{} for unique has started",
+        log.debug("Index: {}. Item: {}. Checking field {}:{} for unique has started",
                 indexName, itemId, fieldName, fieldValue);
         try {
             BoolQueryBuilder boolQueryBuilder = new BoolQueryBuilder()
-                    .must(QueryBuilders.matchPhraseQuery(fieldName, fieldValue));
-            boolQueryBuilder.mustNot(QueryBuilders.matchPhraseQuery("_id", itemId.toString()));
+                    .must(QueryBuilders.matchQuery(fieldName, fieldValue));
+            if (Objects.nonNull(itemId)){
+                boolQueryBuilder.mustNot(QueryBuilders.matchPhraseQuery("_id", itemId.toString()));
+            }
             CountRequest request = new CountRequest(indexName);
             request.query(boolQueryBuilder);
             CountResponse response = esClient.count(request, RequestOptions.DEFAULT);
             return response.getCount() == 0;
         } catch (IOException e) {
-            log.info("Checking for unique failed");
-            throw new HoException(String.format("Ошибка в процессе проверки уникальности значения [%s:%s]: %s",
-                    fieldName, fieldValue, e.getMessage()));
-        }
-    }
-
-    public boolean isUniqueFieldValue(@NotBlank String indexName,
-                                      @NotBlank String fieldName,
-                                      @NotNull Object fieldValue) {
-        log.info("Index: {}. Checking field {}:{} for unique has started", indexName, fieldName, fieldValue);
-        try {
-            BoolQueryBuilder boolQueryBuilder = new BoolQueryBuilder()
-                    .must(QueryBuilders.matchPhraseQuery(fieldName, fieldValue));
-            CountRequest request = new CountRequest(indexName);
-            request.query(boolQueryBuilder);
-            CountResponse response = esClient.count(request, RequestOptions.DEFAULT);
-            return response.getCount() == 0;
-        } catch (IOException e) {
-            log.info("Checking for unique failed");
+            log.debug("Checking for unique failed");
             throw new HoException(String.format("Ошибка в процессе проверки уникальности значения [%s:%s]: %s",
                     fieldName, fieldValue, e.getMessage()));
         }
