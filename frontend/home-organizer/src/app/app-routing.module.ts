@@ -5,6 +5,8 @@ import {DictionaryPageComponent} from "./pages/dictionary-page/dictionary-page.c
 
 const routes: Routes = [
   {path: 'dictionaries', component: DictionaryRegisterComponent},
+  {path: 'notes', component: DictionaryRegisterComponent},
+  {path: 'tests', component: DictionaryRegisterComponent},
   {path: 'dictionaries/:id', component: DictionaryPageComponent}
 ];
 

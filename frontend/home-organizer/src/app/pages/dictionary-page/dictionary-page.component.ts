@@ -58,7 +58,6 @@ export class DictionaryPageComponent implements OnInit {
     if (this.dictionary.id != null) {
       this.itemService.filter(this.dictionary.id, this.filter, this.getSortParam()).subscribe(items => this.items = items)
     }
-    console.log(this.filter)
   }
 
   public changeSort(fieldId: string) {
@@ -76,7 +75,6 @@ export class DictionaryPageComponent implements OnInit {
       const ID = this.dictionary.id
       this.itemService.filter(ID, this.filter, this.getSortParam()).subscribe(items => this.items = items)
     }
-    console.log(this.sort.toJSON())
   }
 
   public getSort(fieldId: string): string {

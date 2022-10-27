@@ -25,7 +25,7 @@ export class ItemService {
         fromObject: {
           sort: sort,
           page: 0,
-          size: 10
+          size: 1000
         },
       })
     }).pipe(

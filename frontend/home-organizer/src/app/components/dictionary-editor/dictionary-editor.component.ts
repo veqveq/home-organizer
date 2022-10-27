@@ -128,7 +128,6 @@ export class DictionaryEditorComponent implements OnInit {
   down(form: FormGroup) {
     let index = this.fields.controls.indexOf(form)
     if (index < this.fields.length - 1) {
-      console.log(index, '->', this.fields.length)
       let lowerIndex = index + 1
 
       let element = this.fields.controls.at(index) as FormControl
