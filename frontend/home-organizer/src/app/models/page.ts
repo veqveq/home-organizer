@@ -3,4 +3,6 @@ export interface Page<T> {
   number: number
   size: number
   totalPages: number
+  first: boolean
+  last: boolean
 }

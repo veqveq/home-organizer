@@ -19,18 +19,17 @@ export class DictionaryService {
   ) {
   }
 
-  getAll(): Observable<Dictionary[]> {
+  getAll(page: number, size: number): Observable<Page<Dictionary>> {
     return this.http.get<Page<Dictionary>>(this.ROOT_API, {
       params: new HttpParams({
         fromObject: {
-          page: 0,
-          size: 10
+          page: page ? page : '',
+          size: size ? size : ''
         }
       })
     }).pipe(
-      map(response => response.content),
       retry(2),
-      tap(dictionaries => this.dictionaries = dictionaries),
+      tap(dictionaries => this.dictionaries = dictionaries.content),
       catchError(this.handleError.bind(this))
     )
   }
@@ -49,11 +48,10 @@ export class DictionaryService {
       )
   }
 
-  delete(dictionary: Dictionary) {
-    this.http.delete(this.ROOT_API + '/' + dictionary.id).pipe(
-      concatMap(() => this.getAll()),
+  delete(dictionary: Dictionary): Observable<void> {
+    return this.http.delete(this.ROOT_API + '/' + dictionary.id).pipe(
       catchError(this.handleError.bind(this))
-    ).subscribe()
+    )
   }
 
   getById(id: string): Observable<Dictionary> {

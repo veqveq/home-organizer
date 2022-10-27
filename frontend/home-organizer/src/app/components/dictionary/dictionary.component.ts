@@ -1,7 +1,8 @@
-import {Component, Input, ViewChild} from "@angular/core";
+import {Component, EventEmitter, Input, Output, ViewChild} from "@angular/core";
 import {Dictionary} from "../../models/dictionary";
 import {DictionaryService} from "../../services/dictionary.service";
 import {RefDirective} from "../../directives/ref.directive";
+import {tap} from "rxjs";
 
 @Component({
   selector: 'app-dictionary',
@@ -9,8 +10,17 @@ import {RefDirective} from "../../directives/ref.directive";
 })
 export class DictionaryComponent {
   @Input() dictionary: Dictionary
+  @Output() needUpdate = new EventEmitter()
   @ViewChild(RefDirective) refDir: RefDirective
 
   constructor(public service: DictionaryService) {
+  }
+
+  delete() {
+    this.service.delete(this.dictionary)
+      .pipe(tap(() => {
+        this.needUpdate.emit()
+      }))
+      .subscribe()
   }
 }

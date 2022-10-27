@@ -6,6 +6,7 @@ import {ErrorService} from "./error.service";
 import {DictionaryItem} from "../models/dictionary-item";
 import {ItemFilter} from "../models/item-filter";
 import {Dictionary} from "../models/dictionary";
+import {formatNumber} from "@angular/common";
 
 @Injectable({
   providedIn: 'root'
@@ -19,17 +20,16 @@ export class ItemService {
   ) {
   }
 
-  filter(dictionaryId: string, filter: ItemFilter, sort: string[]): Observable<DictionaryItem[]> {
+  filter(dictionaryId: string, filter: ItemFilter, sort: string[], size: number, page: number): Observable<Page<DictionaryItem>> {
     return this.http.post<Page<DictionaryItem>>(this.ROOT_API + '/' + dictionaryId + '/filter', filter, {
       params: new HttpParams({
         fromObject: {
           sort: sort,
-          page: 0,
-          size: 1000
+          page: page ? page : '',
+          size: size ? size : ''
         },
       })
     }).pipe(
-      map(response => response.content),
       retry(2)
     )
   }

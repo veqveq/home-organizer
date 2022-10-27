@@ -85,6 +85,12 @@
   <p class="mt-2 italic text-center" *ngIf="items && items.length==0">Нет записей</p>
 </div>
 
+<app-pagination
+  [page]="page"
+  (pageChanged)="page.number = $event;doFilter()"
+  (sizeChanged)="page.size = $event;page.number=0;doFilter()"
+></app-pagination>
+
 <app-modal #createModal title="Новая запись в справочнике '{{dictionary.name}}'">
   <app-dictionary-item-editor
     #createItem

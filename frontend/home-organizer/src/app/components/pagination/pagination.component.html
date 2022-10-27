@@ -1,0 +1,50 @@
+<div class="pr-[60px]">
+
+  <hr class="my-8"/>
+  <div class="flex flex-row justify-between px-4">
+    <ul class="h-[45px] flex">
+      <li class="w-[45px] h-[45px]">
+        <button
+          *ngIf="!page.first"
+          (click)="changePage(currentPage-1)"
+          class="w-full h-full text-center font-bold rounded-full cursor-pointer text-xl hover:text-slate-500 transition ease-in-out duration-300 hover:scale-y-150">
+          <
+        </button>
+      </li>
+
+      <li
+        *ngFor="let page of getPages()"
+        class="ml-2 w-[45px] h-[45px]">
+        <button
+          *ngIf="page != -1"
+          (click)="changePage(page)"
+          [ngClass]="currentPage==page?'bg-blue-200 text-slate-500 hover:text-slate-500':''"
+          class="w-full h-full text-center font-bold rounded-full cursor-pointer text-lg hover:text-slate-500 transition ease-in-out duration-500">
+          {{page}}
+        </button>
+        <p
+          class="text-2xl pt-2 w-full h-full text-center"
+          *ngIf="page==-1">
+          ...
+        </p>
+      </li>
+
+      <li class="w-[45px] h-[45px]">
+        <button
+          *ngIf="!page.last"
+          (click)="changePage(currentPage+1)"
+          class="w-full h-full ml-2 text-center font-bold rounded-full cursor-pointer text-xl hover:text-slate-500 transition ease-in-out duration-300 hover:scale-y-150">
+          >
+        </button>
+      </li>
+    </ul>
+    <div class="flex flex-row">
+      <h1 class="text-lg pr-2 py-2 font-bold">Показывать по:</h1>
+      <select class="text-lg px-2 py-2 border rounded-2xl" #pageSize (change)="changeSize(pageSize.value)">
+        <option>10</option>
+        <option>30</option>
+        <option>50</option>
+      </select>
+    </div>
+  </div>
+</div>
