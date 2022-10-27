@@ -20,7 +20,7 @@ export class CreateDictionaryFieldComponent implements OnInit {
     type: new FormControl<string>('', Validators.required),
     required: new FormControl<boolean>(false),
     unique: new FormControl<boolean>(false),
-    defaultValue: new FormControl<string>('')
+    defaultValue: new FormControl<any>(false)
   })
 
   constructor() {
@@ -34,7 +34,11 @@ export class CreateDictionaryFieldComponent implements OnInit {
       this.form.controls.type.setValue(this.field.type)
       this.form.controls.required.setValue(this.field.required ? this.field.required : false)
       this.form.controls.unique.setValue(this.field?.unique ? this.field.unique : false)
-      this.form.controls.defaultValue.setValue(this.field?.defaultValue ? this.field.defaultValue : '')
+      if (this.field.type == 'Boolean') {
+        this.form.controls.defaultValue.setValue(this.field?.defaultValue == 'true')
+      } else {
+        this.form.controls.defaultValue.setValue(this.field?.defaultValue ? this.field.defaultValue : '')
+      }
     }
   }
 
