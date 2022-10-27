@@ -1,37 +1,46 @@
 <h1 class="font-bold mb-2 text-center text-lg">{{ title | titlecase }}</h1>
 
-  <input
-    type="text"
-    class="mb-2 border py-2 px-4 w-full"
-    placeholder="Поиск справочника по названию..."
-    [(ngModel)]="dictionaryFilter"
-  />
+<input
+  type="text"
+  class="mb-2 border py-2 px-4 w-full"
+  placeholder="Поиск справочника по названию..."
+  [(ngModel)]="dictionaryFilter"
+/>
 
-  <button
-    (click)="createModal.open()"
-    class="w-[60px] h-[60px] font-bold rounded-full bg-red-700 text-white fixed right-5 bottom-5 py-4 px-4 hover:bg-red-300">
-    +
+<button
+  (click)="createModal.open()"
+  class="w-[60px] h-[60px] font-bold rounded-full bg-red-700 text-white fixed right-5 bottom-5 py-4 px-4 hover:bg-red-300">
+  +
+</button>
+
+<h1 class="text-center text-lg" *ngIf="loading">Loading...</h1>
+
+<div *ngIf="dictionaryService.dictionaries" class="min-w-[700px] ">
+  <app-dictionary
+    *ngFor="let dictionary of dictionaryService.dictionaries | dictionaryFilter:dictionaryFilter "
+    (needUpdate)="received();getAll()"
+    [dictionary]="dictionary">
+  </app-dictionary>
+</div>
+
+<div class="flex flex-col"
+     *ngIf="dictionaryService.dictionaries.length == 0 && !loading">
+  <h6 class="italic mb-2 text-center"> Справочники не найдены </h6>
+  <button class="justify-self-center text-blue-500 hover:text-blue-800 hover:font-bold" (click)="createModal.open()">
+    Создайте первый справочник
   </button>
+</div>
 
-  <h1 class="text-center text-lg" *ngIf="loading">Loading...</h1>
-
-  <div *ngIf="dictionaryService.dictionaries" class="min-w-[700px] ">
-    <app-dictionary
-      *ngFor="let dictionary of dictionaryService.dictionaries | dictionaryFilter:dictionaryFilter "
-      [dictionary]="dictionary">
-    </app-dictionary>
-  </div>
-
-  <div class="flex flex-col"
-       *ngIf="dictionaryService.dictionaries.length == 0 && !loading">
-    <h6 class="italic mb-2 text-center"> Справочники не найдены </h6>
-    <button class="justify-self-center text-blue-500 hover:text-blue-800 hover:font-bold" (click)="createModal.open()">
-      Создайте первый справочник
-    </button>
-  </div>
+<app-pagination
+  [page]="page"
+  (pageChanged)="page.number = $event;getAll()"
+  (sizeChanged)="page.size = $event;page.number=0;getAll()">
+</app-pagination>
 
 <app-modal
   #createModal
   title="Создание нового справочника">
-  <app-dictionary-editor [visible$]="createModal.visible$"></app-dictionary-editor>
+  <app-dictionary-editor
+    (itemChanged)="getAll()"
+    [visible$]="createModal.visible$"></app-dictionary-editor>
 </app-modal>

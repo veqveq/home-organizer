@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, Params} from "@angular/router";
 import {DictionaryService} from "../../services/dictionary.service";
 import {Dictionary} from "../../models/dictionary";
@@ -7,14 +7,24 @@ import {DictionaryItem} from "../../models/dictionary-item";
 import {DictionaryField} from "../../models/dictionary-field";
 import {ItemFilter} from "../../models/item-filter";
 import {TSMap} from "typescript-map";
+import {map, tap} from "rxjs";
+import {Page} from "../../models/page";
 
 @Component({
   selector: 'app-dictionary-page',
   templateUrl: './dictionary-page.component.html'
 })
 export class DictionaryPageComponent implements OnInit {
-  dictionary: Dictionary
+  page: Page<any> = new class implements Page<any> {
+    content: any[];
+    first: boolean;
+    last: boolean;
+    number: number;
+    size: number;
+    totalPages: number;
+  }
 
+  dictionary: Dictionary
   filter: ItemFilter = new class implements ItemFilter {
     commonFilter: string = '';
     fieldFilters: TSMap<string, any> = new TSMap();
@@ -35,7 +45,14 @@ export class DictionaryPageComponent implements OnInit {
     this.route.params.subscribe((params: Params) => {
       this.dictionaryService.getById(params.id).subscribe(dic => {
         this.dictionary = dic
-        this.itemService.filter(params.id, this.filter, this.getSortParam()).subscribe(items => this.items = items)
+        this.itemService.filter(params.id, this.filter, this.getSortParam(), this.page.size, this.page.number)
+          .pipe(
+            tap((resp) => {
+              this.page = resp
+            }),
+            map((resp) => resp.content)
+          )
+          .subscribe(items => this.items = items)
       })
     })
   }
@@ -50,13 +67,23 @@ export class DictionaryPageComponent implements OnInit {
     if (this.dictionary.id) {
       const ID = this.dictionary.id
       this.itemService.delete(ID, itemId)
-        .subscribe(() => this.itemService.filter(ID, this.filter, this.getSortParam()).subscribe(items => this.items = items))
+        .subscribe(() => this.itemService.filter(ID, this.filter, this.getSortParam(), this.page.size, this.page.number)
+          .pipe(
+            tap((resp) => this.page = resp),
+            map((resp) => resp.content)
+          )
+          .subscribe(items => this.items = items))
     }
   }
 
   doFilter() {
     if (this.dictionary.id != null) {
-      this.itemService.filter(this.dictionary.id, this.filter, this.getSortParam()).subscribe(items => this.items = items)
+      this.itemService.filter(this.dictionary.id, this.filter, this.getSortParam(), this.page.size, this.page.number)
+        .pipe(
+          tap((resp) => this.page = resp),
+          map((resp) => resp.content)
+        )
+        .subscribe(items => this.items = items)
     }
   }
 
@@ -73,7 +100,12 @@ export class DictionaryPageComponent implements OnInit {
     }
     if (this.dictionary.id) {
       const ID = this.dictionary.id
-      this.itemService.filter(ID, this.filter, this.getSortParam()).subscribe(items => this.items = items)
+      this.itemService.filter(ID, this.filter, this.getSortParam(), this.page.size, this.page.number)
+        .pipe(
+          tap((resp) => this.page = resp),
+          map((resp) => resp.content)
+        )
+        .subscribe(items => this.items = items)
     }
   }
 

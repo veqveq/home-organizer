@@ -2,10 +2,9 @@ import {Component, Input, OnInit} from '@angular/core';
 import {DictionaryItem} from "../../models/dictionary-item";
 import {ItemService} from "../../services/item.service";
 import {TSMap} from "typescript-map";
-import {BehaviorSubject, Observable} from "rxjs";
+import {BehaviorSubject, map, Observable, tap} from "rxjs";
 import {DictionaryPageComponent} from "../../pages/dictionary-page/dictionary-page.component";
 import {
-  AbstractControl,
   FormArray,
   FormBuilder,
   FormControl,
@@ -107,7 +106,11 @@ export class DictionaryItemEditorComponent implements OnInit {
       const ID = this.page.dictionary.id
       this.itemService.create(ID, this.getItem())
         .subscribe(() => {
-          this.itemService.filter(ID, this.page.filter, this.page.getSortParam())
+          this.itemService.filter(ID, this.page.filter, this.page.getSortParam(), this.page.page.size, this.page.page.number)
+            .pipe(
+              tap((resp)=>this.page.page = resp),
+              map((resp) => resp.content)
+            )
             .subscribe(items => this.page.items = items)
           this.close()
         })
@@ -119,7 +122,11 @@ export class DictionaryItemEditorComponent implements OnInit {
       const ID = this.page.dictionary.id
       this.itemService.update(ID, this.form.controls.id.value, this.getItem())
         .subscribe(() => {
-          this.itemService.filter(ID, this.page.filter, this.page.getSortParam())
+          this.itemService.filter(ID, this.page.filter, this.page.getSortParam(), this.page.page.size, this.page.page.number)
+            .pipe(
+              tap((resp)=>this.page.page = resp),
+              map((resp) => resp.content)
+            )
             .subscribe(items => this.page.items = items)
           this.close()
         })

@@ -16,6 +16,7 @@ import {DictionaryRegisterComponent} from './pages/dictionary-register/dictionar
 import {RefDirective} from "./directives/ref.directive";
 import {DictionaryPageComponent} from './pages/dictionary-page/dictionary-page.component';
 import { DictionaryItemEditorComponent } from './components/dictionary-item-editor/dictionary-item-editor.component';
+import { PaginationComponent } from './components/pagination/pagination.component';
 
 @NgModule({
   declarations: [
@@ -30,7 +31,8 @@ import { DictionaryItemEditorComponent } from './components/dictionary-item-edit
     CreateDictionaryFieldComponent,
     DictionaryRegisterComponent,
     DictionaryPageComponent,
-    DictionaryItemEditorComponent
+    DictionaryItemEditorComponent,
+    PaginationComponent
   ],
   imports: [
     BrowserModule,

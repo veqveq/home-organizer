@@ -1,10 +1,10 @@
-import {Component, Input, OnInit, ViewChild, ViewRef} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output, ViewChild, ViewRef} from '@angular/core';
 import {FormArray, FormBuilder, FormControl, FormGroup, Validators} from "@angular/forms";
 import {DictionaryService} from "../../services/dictionary.service";
 import {Dictionary} from "../../models/dictionary";
 import {CreateDictionaryFieldComponent} from "../dictionary-field-editor/dictionary-field-editor.component";
 import {RefDirective} from "../../directives/ref.directive";
-import {BehaviorSubject, concatMap} from "rxjs";
+import {BehaviorSubject, concatMap, tap} from "rxjs";
 import {DictionaryField} from "../../models/dictionary-field";
 
 @Component({
@@ -15,6 +15,7 @@ export class DictionaryEditorComponent implements OnInit {
   @ViewChild(RefDirective, {static: true}) refDir: RefDirective
   @Input() visible$: BehaviorSubject<boolean>
   @Input() dictionary: Dictionary
+  @Output() itemChanged = new EventEmitter()
 
   form = this.builder.group({
     name: ['', {
@@ -58,7 +59,9 @@ export class DictionaryEditorComponent implements OnInit {
 
   create() {
     this.dictionaryService.create(<Dictionary>this.form.value)
-      .pipe(concatMap(() => this.dictionaryService.getAll()))
+      .pipe(
+        tap(() => this.itemChanged.emit())
+      )
       .subscribe(() => {
         this.close()
         this.clean()
@@ -100,10 +103,11 @@ export class DictionaryEditorComponent implements OnInit {
   update() {
     if (this.dictionary.id) {
       this.dictionaryService.update(this.dictionary.id, <Dictionary>this.form.value)
-        .pipe(concatMap(() => this.dictionaryService.getAll()))
-        .subscribe(() => {
-          this.close()
-        })
+        .pipe(
+          tap(() => this.itemChanged.emit())
+        ).subscribe(() => {
+        this.close()
+      })
     }
   }
 
