@@ -25,6 +25,7 @@ export class DictionaryItemEditorComponent implements OnInit {
   @Input() isUpdate: boolean = false
 
   form: FormGroup
+  load: boolean
   types = [
     {field: 'Text', type: 'text', placeholder: 'Текст...'},
     {field: 'Double', type: 'number', placeholder: 'Дробное число...'},
@@ -52,19 +53,21 @@ export class DictionaryItemEditorComponent implements OnInit {
     })
     const arrayControl = <FormArray>newForm.controls['fieldValues']
     this.page.dictionary.fields.forEach(fld => {
-      if (fld != undefined) {
-        let newGroup = this.fb.group({});
-        let item
-        let control: FormControl = this.fb.control(item)
-        if (fld.required) {
-          control.addValidators(Validators.required)
-        }
-        if (fld.unique) {
-          newGroup.addAsyncValidators([this.uniqueValidator.bind(this)])
-        }
-        newGroup.addControl(fld.id ? fld.id : '', control)
-        arrayControl.push(newGroup)
+      let newGroup = this.fb.group({});
+      let control
+      if (fld.type == 'Boolean') {
+        control = this.fb.control<boolean>(fld.defaultValue == 'true')
+      } else {
+        control = this.fb.control('')
       }
+      if (fld.required) {
+        control.addValidators(Validators.required)
+      }
+      if (fld.unique) {
+        newGroup.addAsyncValidators([this.uniqueValidator.bind(this)])
+      }
+      newGroup.addControl(fld.id, control)
+      arrayControl.push(newGroup)
     })
     this.form = newForm
   }
@@ -79,61 +82,67 @@ export class DictionaryItemEditorComponent implements OnInit {
     const arrayControl = <FormArray>newForm.controls['fieldValues']
     let itemFields: TSMap<string, any> = new TSMap<string, any>().fromJSON(JSON.parse(JSON.stringify(item.fieldValues)));
     this.page.dictionary.fields.forEach(fld => {
-      if (fld != undefined) {
-        let newGroup = this.fb.group({});
-        if (fld.id) {
-          let item
-          if (itemFields.has(fld.id)) {
-            item = itemFields.get(fld.id)
-          }
-          let control: FormControl = this.fb.control(item)
-          if (fld.required) {
-            control.addValidators(Validators.required)
-          }
-          if (fld.unique) {
-            newGroup.addAsyncValidators([this.uniqueValidator.bind(this)])
-          }
-          newGroup.addControl(fld.id, control)
-          arrayControl.push(newGroup)
+      let newGroup = this.fb.group({});
+      if (fld.id) {
+        let item
+        let control
+
+        if (itemFields.has(fld.id)) {
+          item = itemFields.get(fld.id)
         }
+
+        if (fld.type == 'Boolean') {
+          control = this.fb.control<boolean>(item == 'true')
+          console.log('exist', item, control)
+        } else {
+          control = this.fb.control(item)
+        }
+        if (fld.required) {
+          control.addValidators(Validators.required)
+        }
+        if (fld.unique) {
+          newGroup.addAsyncValidators([this.uniqueValidator.bind(this)])
+        }
+        newGroup.addControl(fld.id, control)
+        arrayControl.push(newGroup)
       }
     })
     this.form = newForm
   }
 
   public save() {
-    if (this.page.dictionary.id) {
-      const ID = this.page.dictionary.id
-      this.itemService.create(ID, this.getItem())
-        .subscribe(() => {
-          this.itemService.filter(ID, this.page.filter, this.page.getSortParam(), this.page.page.size, this.page.page.number)
-            .pipe(
-              tap((resp)=>this.page.page = resp),
-              map((resp) => resp.content)
-            )
-            .subscribe(items => this.page.items = items)
-          this.close()
-        })
-    }
+    this.load = true
+    this.itemService.create(this.page.dictionary.id, this.getItem())
+      .subscribe(() => {
+        this.itemService.filter(this.page.dictionary.id, this.page.filter, this.page.getSortParam(), this.page.page.size, this.page.page.number)
+          .pipe(
+            tap((resp) => {
+              this.page.page = resp
+              this.load = false
+            }),
+            map((resp) => resp.content)
+          )
+          .subscribe(items => this.page.items = items)
+        this.close()
+      })
   }
 
   public update() {
-    if (this.page.dictionary.id) {
-      const ID = this.page.dictionary.id
-      this.itemService.update(ID, this.form.controls.id.value, this.getItem())
-        .subscribe(() => {
-          this.itemService.filter(ID, this.page.filter, this.page.getSortParam(), this.page.page.size, this.page.page.number)
-            .pipe(
-              tap((resp)=>this.page.page = resp),
-              map((resp) => resp.content)
-            )
-            .subscribe(items => this.page.items = items)
-          this.close()
-        })
-    }
+    this.load = true
+    this.itemService.update(this.page.dictionary.id, this.form.controls.id.value, this.getItem())
+      .subscribe(() => {
+        this.itemService.filter(this.page.dictionary.id, this.page.filter, this.page.getSortParam(), this.page.page.size, this.page.page.number)
+          .pipe(
+            tap((resp) => this.page.page = resp),
+            map((resp) => resp.content)
+          )
+          .subscribe(items => this.page.items = items)
+        this.close()
+      })
   }
 
   public close() {
+    this.load = false
     this.visible$.next(false)
   }
 
@@ -159,7 +168,7 @@ export class DictionaryItemEditorComponent implements OnInit {
   }
 
   setDefaultValue(field: DictionaryField, index: number) {
-    if (field.defaultValue != '') {
+    if (field.defaultValue) {
       let formControl = this.getFormControl(field, index)
       formControl.setValue(field.defaultValue)
     }
@@ -177,5 +186,15 @@ export class DictionaryItemEditorComponent implements OnInit {
     let id = Object.keys(field)[0]
     let value = Object.values(field)[0]
     return this.validationService.validateUnique(this.page.dictionary.id, this.itemId, id, value)
+  }
+
+  onClick(fld: DictionaryField, input: HTMLInputElement, i: number) {
+    if (fld.type == 'Boolean') {
+      this.getFormControl(fld, i).setValue(input.checked)
+    } else {
+      if (input.value == '') {
+        this.setDefaultValue(fld, i)
+      }
+    }
   }
 }

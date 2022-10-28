@@ -13,7 +13,7 @@
   +
 </button>
 
-<h1 class="text-center text-lg" *ngIf="loading">Loading...</h1>
+
 
 <div *ngIf="dictionaryService.dictionaries" class="min-w-[700px] ">
   <app-dictionary
@@ -24,7 +24,7 @@
 </div>
 
 <div class="flex flex-col"
-     *ngIf="dictionaryService.dictionaries.length == 0 && !loading">
+     *ngIf="dictionaryService.dictionaries.length == 0 && !load">
   <h6 class="italic mb-2 text-center"> Справочники не найдены </h6>
   <button class="justify-self-center text-blue-500 hover:text-blue-800 hover:font-bold" (click)="createModal.open()">
     Создайте первый справочник
@@ -44,3 +44,11 @@
     (itemChanged)="getAll()"
     [visible$]="createModal.visible$"></app-dictionary-editor>
 </app-modal>
+
+
+<app-loader
+  [size]="20"
+  text="Загрузка справочников..."
+  [darkBg]="true"
+  [visible]="load">
+</app-loader>
