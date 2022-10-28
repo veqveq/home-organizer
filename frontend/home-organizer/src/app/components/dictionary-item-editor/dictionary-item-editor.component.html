@@ -1,0 +1,93 @@
+<form [formGroup]="form">
+  <div formArrayName="fieldValues"
+       *ngFor="let fld of page.dictionary.fields; let i = index"
+       [ngClass]="fld.type == 'Boolean'?'flex flex-row items-center':''"
+       class="mb-4"
+  >
+    <div class="flex mb-2 px-2 ">
+      <h3 class="grow font-bold text-lg">{{fld.name}}</h3>
+      <p *ngIf="fld.required" class="text-xl font-bold text-red-500 group  cursor-pointer relative">
+        R
+        <span
+          class="z-50 group-hover:opacity-100 opacity-0 absolute right-6 bottom-0 text-sm  transition ease-in-out duration-500 px-4 py-2 border-2 border-slate-500 rounded bg-slate-50 text-slate-500">Обязательное значение</span>
+      </p>
+      <p *ngIf="fld.unique" class="text-xl font-bold text-amber-500 group  cursor-pointer relative">
+        U
+        <span
+          class="z-50 group-hover:opacity-100 opacity-0 absolute right-0 bottom-6 text-sm  transition ease-in-out duration-500 px-4 py-2 border-2 border-slate-500 rounded bg-slate-50 text-slate-500">Уникальное значение</span>
+      </p>
+    </div>
+    <div [formGroupName]="i">
+      <div
+        [ngClass]="fld.type == 'Boolean'?'pl-4':''"
+        class="flex relative">
+        <input
+          #input
+          class="input w-full border rounded-2xl p-2 mb-2"
+          type="{{getInputType(fld.type)}}"
+          formControlName="{{fld.id}}"
+          [ngClass]="getFormControl(fld, i).errors != null || fieldValues.at(i).errors?.notUnique ? 'border-2 border-red-500':''"
+          [placeholder]="fld.type != 'Boolean' && fld.defaultValue?fld.defaultValue+'(по умолчанию)':getPlaceholder(fld.type)"
+          [defaultChecked]="isUpdate?getFormControl(fld,i).value:fld.defaultValue == 'true'"
+          (click)="onClick(fld,input,i)"
+        />
+        <p
+          *ngIf="fld.unique"
+          [ngClass]="fieldValues.at(i).errors?.notUnique? 'text-red-600 text-2xl group cursor-pointer':'text-green-700 text-2xl'"
+          class="pl-2 font-medium mb-2 text-left"
+        >
+          {{fieldValues.at(i).errors?.notUnique ? '&#10008;' : '&#10004;'}}
+          <span
+            class="group-hover:opacity-100 opacity-0 absolute right-0 -bottom-7 text-sm  transition ease-in-out duration-500 px-4 py-2 border-2 border-slate-500 rounded bg-slate-50 text-slate-500">Значение не уникально</span>
+        </p>
+      </div>
+      <p
+        *ngIf="getFormControl(fld, i).errors?.required"
+        class="pl-2 text-red-600 font-medium mb-2 text-left "
+      >
+        Обязательное
+      </p>
+    </div>
+  </div>
+</form>
+
+
+<hr class="mb-4">
+
+<div class="px-4" [ngSwitch]="isUpdate">
+  <div class="flex justify-between" *ngSwitchCase="false">
+    <button
+      #btn
+      [disabled]="!form.valid || load"
+      [ngClass]="btn.disabled?'bg-gray-400':'hover:bg-blue-700'"
+      type="button" class="rounded py-2 px-4 bg-blue-500 text-white flex"
+      (click)="save()">
+      <app-loader
+        text="Сохранение..."
+        [visible]="load">
+      </app-loader>
+      <span
+        *ngIf="!load"
+      >Сохранить</span>
+    </button>
+    <button type="button" class="rounded py-2 px-4 bg-red-500 text-white hover:bg-red-700" (click)="close()">
+      Отмена
+    </button>
+  </div>
+  <div class="flex justify-between" *ngSwitchCase="true">
+    <button
+      #btn
+      [disabled]="!form.valid || load"
+      [ngClass]="btn.disabled?'bg-gray-400':'hover:bg-blue-700'"
+      type="button" class="rounded py-2 px-4 bg-blue-500 text-white flex" (click)="update()">
+      <app-loader
+        text="Обновление..."
+        [visible]="load"></app-loader>
+      <span
+        *ngIf="!load"
+      >Обновить</span>
+    </button>
+    <button type="button" class="rounded py-2 px-4 bg-red-500 text-white hover:bg-red-700" (click)="close()">Отмена
+    </button>
+  </div>
+</div>

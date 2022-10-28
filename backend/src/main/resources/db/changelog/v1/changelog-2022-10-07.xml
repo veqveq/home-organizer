@@ -1,0 +1,37 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+    <changeSet id="20221007-0" author="e.vasyakov">
+        <sql>CREATE EXTENSION IF NOT EXISTS "uuid-ossp"</sql>
+        <createTable tableName="dictionary" remarks="Словари">
+            <column name="id" type="uuid" remarks="Идентификатор" defaultValueComputed="uuid_generate_v4()">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="text" remarks="Название словаря">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="20221007-1" author="e.vasyakov">
+        <createTable tableName="dictionary_field" remarks="Поля словарей">
+            <column name="id" type="uuid" remarks="Идентификатор" defaultValueComputed="uuid_generate_v4()">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="text" remarks="Название поля">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="text" remarks="Тип поля">
+                <constraints nullable="false"/>
+            </column>
+            <column name="default_value" type="text" remarks="Значение по умолчанию"/>
+            <column name="dictionary_id" type="uuid" remarks="Идентификатор справочника">
+                <constraints nullable="false"/>
+            </column>
+            <column name="unique_value" type="boolean" remarks="Уникальное поле" defaultValueBoolean="false"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="dictionary_field" baseColumnNames="dictionary_id"
+                                 constraintName="fk_dictionary_field"
+                                 referencedTableName="dictionary"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+</databaseChangeLog>

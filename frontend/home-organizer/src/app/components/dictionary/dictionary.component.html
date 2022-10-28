@@ -1,0 +1,28 @@
+<div class="group rounded-2xl  border text-lg text-left rounded flex items-center flex-row mb-2
+  transition ease-in-out hover:scale-105 duration-300
+  hover:text-blue-500 hover:bg-gray-200">
+  <a class="grow pl-6 pr-2 py-8 grow text-lg flex text-center flex-row font-bold"
+
+     [routerLink]="['/dictionaries',dictionary.id]"
+  >{{ dictionary.name }}</a>
+  <div class="grid grid-cols-1 gap-4 content-between pr-4">
+    <button
+      (click)="createModal.open()"
+      class="group-hover:opacity-100 opacity-0 transition ease-in-out bg-amber-600 hover:-translate-y-1 hover:scale-110  hover:bg-amber-300 duration-300 border  rounded-full text-white w-[30px]">
+      &#9998;
+    </button>
+    <button
+      (click)="delete()"
+      class="group-hover:opacity-100 opacity-0 transition ease-in-out bg-red-600 hover:-translate-y-1 hover:scale-110  hover:bg-red-300 duration-300 border  rounded-full text-white w-[30px]">
+      &#10008;
+    </button>
+  </div>
+</div>
+<app-modal
+  #createModal
+  title="Изменение справочника: '{{dictionary.name}}'">
+  <app-dictionary-editor
+    (itemChanged)="needUpdate.emit()"
+    [dictionary]="dictionary"
+    [visible$]="createModal.visible$"></app-dictionary-editor>
+</app-modal>
