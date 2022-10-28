@@ -9,12 +9,14 @@ import {ItemFilter} from "../../models/item-filter";
 import {TSMap} from "typescript-map";
 import {map, tap} from "rxjs";
 import {Page} from "../../models/page";
+import loader from "@angular-devkit/build-angular/src/webpack/plugins/single-test-transform";
 
 @Component({
   selector: 'app-dictionary-page',
   templateUrl: './dictionary-page.component.html'
 })
 export class DictionaryPageComponent implements OnInit {
+  loader: boolean = false
   page: Page<any> = new class implements Page<any> {
     content: any[];
     first: boolean;
@@ -58,33 +60,31 @@ export class DictionaryPageComponent implements OnInit {
   }
 
   public getValue(fld: DictionaryField, item: DictionaryItem): any {
-    if (fld.id) {
-      return JSON.parse(JSON.stringify(item.fieldValues))[fld.id]
-    }
+    return JSON.parse(JSON.stringify(item.fieldValues))[fld.id]
   }
 
   delete(itemId: string) {
-    if (this.dictionary.id) {
-      const ID = this.dictionary.id
-      this.itemService.delete(ID, itemId)
-        .subscribe(() => this.itemService.filter(ID, this.filter, this.getSortParam(), this.page.size, this.page.number)
-          .pipe(
-            tap((resp) => this.page = resp),
-            map((resp) => resp.content)
-          )
-          .subscribe(items => this.items = items))
-    }
+    this.loader = true
+    this.itemService.delete(this.dictionary.id, itemId)
+      .subscribe(() => {
+          this.itemService.filter(this.dictionary.id, this.filter, this.getSortParam(), this.page.size, this.page.number)
+            .pipe(
+              tap((resp) => this.page = resp),
+              map((resp) => resp.content)
+            )
+            .subscribe(items => this.items = items)
+          this.loader = false
+        }
+      )
   }
 
   doFilter() {
-    if (this.dictionary.id != null) {
-      this.itemService.filter(this.dictionary.id, this.filter, this.getSortParam(), this.page.size, this.page.number)
-        .pipe(
-          tap((resp) => this.page = resp),
-          map((resp) => resp.content)
-        )
-        .subscribe(items => this.items = items)
-    }
+    this.itemService.filter(this.dictionary.id, this.filter, this.getSortParam(), this.page.size, this.page.number)
+      .pipe(
+        tap((resp) => this.page = resp),
+        map((resp) => resp.content)
+      )
+      .subscribe(items => this.items = items)
   }
 
   public changeSort(fieldId: string) {

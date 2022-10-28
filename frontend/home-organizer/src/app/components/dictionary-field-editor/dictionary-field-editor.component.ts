@@ -10,7 +10,7 @@ import {DictionaryEditorComponent} from "../dictionary-editor/dictionary-editor.
 })
 export class CreateDictionaryFieldComponent implements OnInit {
 
-  @Input('field') field?: DictionaryField
+  @Input() field: DictionaryField
   types = Object.entries(FieldType).map(([key, value]) => ({id: key, value: value}))
   component: DictionaryEditorComponent
   form = new FormGroup({
@@ -28,16 +28,16 @@ export class CreateDictionaryFieldComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.field) {
-      this.form.controls.id.setValue(this.field.id ? this.field.id : '')
+      this.form.controls.id.setValue(this.field.id)
       this.form.controls.position.setValue(this.field.position)
       this.form.controls.name.setValue(this.field.name)
       this.form.controls.type.setValue(this.field.type)
-      this.form.controls.required.setValue(this.field.required ? this.field.required : false)
-      this.form.controls.unique.setValue(this.field?.unique ? this.field.unique : false)
+      this.form.controls.required.setValue(this.field.required)
+      this.form.controls.unique.setValue(this.field.unique)
       if (this.field.type == 'Boolean') {
-        this.form.controls.defaultValue.setValue(this.field?.defaultValue == 'true')
+        this.form.controls.defaultValue.setValue(this.field.defaultValue == 'true')
       } else {
-        this.form.controls.defaultValue.setValue(this.field?.defaultValue ? this.field.defaultValue : '')
+        this.form.controls.defaultValue.setValue(this.field.defaultValue)
       }
     }
   }

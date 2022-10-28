@@ -54,7 +54,6 @@
         </div>
       </td>
     </tr>
-
     <tr
       class="group hover:bg-opacity-0 transition ease-in-out hover:translate-x-4 hover:scale-[1.03] flex-row hover:bg-blue-3 hover:cursor-pointer odd:bg-white even:bg-slate-50"
       *ngFor="let item of items">
@@ -63,7 +62,7 @@
           class="group-hover:bg-blue-300 table-data px-4 py-2 border text-center grow transition ease-in-out duration-300"
           [ngClass]="[field.required?'font-bold':'',field.unique?'italic':'']">
         <span *ngIf="field.type != 'Boolean'" [innerHTML]="getValue(field,item)"></span>
-        <input *ngIf="field.type == 'Boolean'" type="checkbox" disabled [checked]="getValue(field,item)"/>
+        <input *ngIf="field.type == 'Boolean'" type="checkbox" disabled [checked]="getValue(field,item) == 'true'"/>
       </td>
       <td class="group-hover:bg-opacity-0 bg-white">
         <button
@@ -107,3 +106,10 @@
     [isUpdate]="true"
   ></app-dictionary-item-editor>
 </app-modal>
+
+<app-loader
+  [size]="20"
+  text="Удаление записи..."
+  [darkBg]="true"
+  [visible]="loader">
+</app-loader>

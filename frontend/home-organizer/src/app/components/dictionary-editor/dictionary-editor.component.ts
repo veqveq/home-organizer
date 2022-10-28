@@ -101,14 +101,12 @@ export class DictionaryEditorComponent implements OnInit {
   }
 
   update() {
-    if (this.dictionary.id) {
       this.dictionaryService.update(this.dictionary.id, <Dictionary>this.form.value)
         .pipe(
           tap(() => this.itemChanged.emit())
         ).subscribe(() => {
         this.close()
       })
-    }
   }
 
   up(form: FormGroup) {

@@ -19,7 +19,7 @@ export class DictionaryRegisterComponent implements OnInit {
   }
 
   title = 'Справочники';
-  loading = false
+  load = false
   dictionaryFilter = ''
 
   constructor(
@@ -28,7 +28,7 @@ export class DictionaryRegisterComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.loading = true
+    this.load = true
     this.getAll()
   }
 
@@ -39,6 +39,6 @@ export class DictionaryRegisterComponent implements OnInit {
           this.page = resp
         }),
         map((resp) => resp.content))
-      .subscribe(() => this.loading = false)
+      .subscribe(() => this.load = false)
   }
 }

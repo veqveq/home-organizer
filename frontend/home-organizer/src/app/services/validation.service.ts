@@ -15,12 +15,6 @@ export class ValidationService {
   }
 
   validateUnique(dictionaryId: string, itemId: string, fieldId: string, fieldValue: any): Observable<ValidationErrors | null> {
-    if (fieldValue == null){
-      return new Observable<ValidationErrors>(observer=> {
-        observer.next(null)
-        observer.complete()
-      })
-    }
     return this.http.get<boolean>(this.ROOT_API + '/' + dictionaryId + '/is-unique', {
       params: new HttpParams({
         fromObject: {
