@@ -37,13 +37,13 @@ services:
       DB_VENDOR: postgres
       DB_ADDR: postgres
       DB_DATABASE: ${HO_DB_DATABASE}
-      DB_SCHEMA: ${HO_AUTH_DB_SCHEMA}
+      DB_SCHEMA: ${HO_KC_DB_SCHEMA}
       DB_USER: ${HO_DB_USER}
       DB_PASSWORD: ${HO_DB_PASSWORD}
-      KEYCLOAK_USER: admin
-      KEYCLOAK_PASSWORD: admin
+      KEYCLOAK_USER: ${HO_KC_MASTER_USERNAME}
+      KEYCLOAK_PASSWORD: ${HO_KC_MASTER_PASSWORD}
     ports:
-      - "${HO_AUTH_PORT}:8080"
+      - "${HO_KC_PORT}:8080"
     depends_on:
       - postgres
     networks:
