@@ -1,0 +1,26 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+    <changeSet id="20221107-0" author="e.vasyakov">
+        <sql>CREATE
+        EXTENSION IF NOT EXISTS "uuid-ossp"</sql>
+        <createTable tableName="user" remarks="Пользователи">
+            <column name="id" type="uuid" remarks="Идентификатор" defaultValueComputed="uuid_generate_v4()">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="username" type="text" remarks="Имя пользователя">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="first_name" type="text" remarks="Имя"/>
+            <column name="last_name" type="text" remarks="Фамилия"/>
+            <column name="patronymic" type="text" remarks="Отчетсво"/>
+            <column name="birthday" type="date" remarks="Дата рождения"/>
+            <column name="email" type="text" remarks="Электронная почта">
+                <constraints unique="true"/>
+            </column>
+            <column name="kc_uuid" type="uuid" remarks="Идентификатор в Keycloak">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>
