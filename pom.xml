@@ -18,6 +18,7 @@
     <modules>
         <module>auth</module>
         <module>backend</module>
+        <module>cookbook</module>
     </modules>
 
     <properties>
