@@ -1,0 +1,41 @@
+server:
+  port: 8082
+  error:
+    include-message: always
+
+
+spring:
+  jpa:
+    show-sql: false
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 100
+        order_inserts: true
+        order_updates: true
+        generate_statistics: false
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQL10Dialect
+        default_schema: ${HO_COOKBOOK_SCHEMA}
+  liquibase:
+    change-log: classpath:db/changelog/changelog-master.xml
+    default-schema: ${spring.jpa.properties.hibernate.default_schema}
+    parameters:
+      schema: ${spring.jpa.properties.hibernate.default_schema}
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${HO_DB_HOST}:${HO_DB_PORT}/${HO_DB_DATABASE}
+    username: ${HO_DB_USER}
+    password: ${HO_DB_PASSWORD}
+
+springdoc:
+  swagger-ui:
+    path: /v1/api-docs/index.html
+    disable-swagger-default-url: true
+  api-docs:
+    path: /v1/api-docs
+
+parser:
+  start-url: ${HO_COOKBOOK_START_URL}
+  register-fragment: ${HO_COOKBOOK_REGISTER_ENDPOINT}
+  pagination-param: ${HO_COOKBOOK_PAGINATION_PARAM}
