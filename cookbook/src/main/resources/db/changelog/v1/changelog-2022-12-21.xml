@@ -1,0 +1,135 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+    <changeSet id="20221221-0" author="e.vasyakov">
+        <sql>CREATE
+        EXTENSION IF NOT EXISTS "uuid-ossp"</sql>
+        <createTable tableName="recipe" remarks="Рецепт">
+            <column name="id" type="uuid" remarks="Идентификатор" defaultValueComputed="uuid_generate_v4()">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="title" type="text" remarks="Название">
+                <constraints nullable="false"/>
+            </column>
+            <column name="kcal" type="bigint" remarks="Калорийность, ккал"/>
+            <column name="prot" type="bigint" remarks="Белки, г"/>
+            <column name="fats" type="bigint" remarks="Жиры, г"/>
+            <column name="carb" type="bigint" remarks="Углеводы, г"/>
+            <column name="portion" type="bigint" remarks="Кол-во порций"/>
+            <column name="cook_time" type="double" remarks="Время готовки, мин"/>
+            <column name="description" type="text" remarks="Описание"/>
+            <column name="likes" type="bigint" remarks="Кол-во положительных отзывов"/>
+            <column name="dislikes" type="bigint" remarks="Кол-во отрицательных отзывов"/>
+            <column name="image_url" type="text" remarks="Ссылка на картинку"/>
+            <column name="web_url" type="text" remarks="Ссылка на рецепт">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type_id" type="uuid" remarks="Идентификатор типа блюда"/>
+            <column name="category_id" type="uuid" remarks="Идентификатор категории блюда"/>
+            <column name="kitchen_id" type="uuid" remarks="Идентификатор кухни"/>
+            <column name="completed" type="bool" remarks="Парсинг завершен" defaultValueBoolean="false"/>
+        </createTable>
+
+        <createTable tableName="ingredient">
+            <column name="id" type="uuid" remarks="Идентификатор" defaultValueComputed="uuid_generate_v4()">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="recipe_id" type="uuid" remarks="Идентификатор рецепта">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ingredient_name_id" type="uuid" remarks="Идентификатор названия ингредиента">
+                <constraints nullable="false"/>
+            </column>
+            <column name="count" type="double" remarks="Количество"/>
+            <column name="unit_id" type="uuid" remarks="Идентификатор единицы измерения">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="ingredient_name" remarks="Название ингредиента">
+            <column name="id" type="uuid" remarks="Идентификатор" defaultValueComputed="uuid_generate_v4()">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="text" remarks="Название">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="type" remarks="Тип блюда">
+            <column name="id" type="uuid" remarks="Идентификатор" defaultValueComputed="uuid_generate_v4()">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="text" remarks="Название">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="kitchen" remarks="Кухня">
+            <column name="id" type="uuid" remarks="Идентификатор" defaultValueComputed="uuid_generate_v4()">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="text" remarks="Название">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="category" remarks="Категория блюда">
+            <column name="id" type="uuid" remarks="Идентификатор" defaultValueComputed="uuid_generate_v4()">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="text" remarks="Название">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="ingredient_unit" remarks="Единица измерения ингредиента">
+            <column name="id" type="uuid" remarks="Идентификатор" defaultValueComputed="uuid_generate_v4()">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="text" remarks="Название">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="recipe" baseColumnNames="type_id"
+                                 constraintName="fk_recipe_type"
+                                 referencedTableName="type"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="recipe" baseColumnNames="category_id"
+                                 constraintName="fk_recipe_category"
+                                 referencedTableName="category"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="recipe" baseColumnNames="kitchen_id"
+                                 constraintName="fk_recipe_kitchen"
+                                 referencedTableName="kitchen"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="ingredient" baseColumnNames="recipe_id"
+                                 constraintName="fk_ingredient_recipe"
+                                 referencedTableName="recipe"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="ingredient" baseColumnNames="ingredient_name_id"
+                                 constraintName="fk_ingredient_name"
+                                 referencedTableName="ingredient_name"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="ingredient" baseColumnNames="unit_id"
+                                 constraintName="fk_ingredient_unit"
+                                 referencedTableName="ingredient_unit"
+                                 referencedColumnNames="id"/>
+
+        <createIndex tableName="category" indexName="ix_category_name">
+            <column name="name"/>
+        </createIndex>
+        <createIndex tableName="ingredient_name" indexName="ix_ingredient_name_name">
+            <column name="name"/>
+        </createIndex>
+        <createIndex tableName="ingredient_unit" indexName="ix_ingredient_unit_name">
+            <column name="name"/>
+        </createIndex>
+        <createIndex tableName="kitchen" indexName="ix_kitchen_name">
+            <column name="name"/>
+        </createIndex>
+        <createIndex tableName="type" indexName="ix_type_name">
+            <column name="name"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

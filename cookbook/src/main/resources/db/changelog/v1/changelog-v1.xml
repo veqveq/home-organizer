@@ -1,0 +1,6 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+    <include file="db/changelog/v1/changelog-2022-12-21.xml"/>
+    <include file="db/changelog/v1/changelog-2023-01-02.xml"/>
+</databaseChangeLog>

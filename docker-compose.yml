@@ -1,0 +1,53 @@
+version: '3.9'
+services:
+  postgres:
+    image: postgres:13.2
+    container_name: ho-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${HO_DB_DATABASE}
+      POSTGRES_USER: ${HO_DB_USER}
+      POSTGRES_PASSWORD: ${HO_DB_PASSWORD}
+    ports:
+      - "${HO_DB_PORT}:5432"
+    volumes:
+      - ./deploy/sql/script/init-schemas.sql:/docker-entrypoint-initdb.d/init-schemas.sql
+    networks:
+      - ho-net
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.2
+    container_name: ho-elasticsearch
+    restart: unless-stopped
+    environment:
+      ES_JAVA_OPTS: "-Xmx512m -Xms512m"
+      discovery.type: single-node
+      network.host: 0.0.0.0
+      cluster.name: home-organizer
+    ports:
+      - "${HO_ELASTIC_PORT}:9200"
+    networks:
+      - ho-net
+
+  keycloak:
+    image: jboss/keycloak:16.1.1
+    container_name: ho-keycloak
+    restart: unless-stopped
+    environment:
+      DB_VENDOR: postgres
+      DB_ADDR: postgres
+      DB_DATABASE: ${HO_DB_DATABASE}
+      DB_SCHEMA: ${HO_KC_DB_SCHEMA}
+      DB_USER: ${HO_DB_USER}
+      DB_PASSWORD: ${HO_DB_PASSWORD}
+      KEYCLOAK_USER: ${HO_KC_MASTER_USERNAME}
+      KEYCLOAK_PASSWORD: ${HO_KC_MASTER_PASSWORD}
+    ports:
+      - "${HO_KC_PORT}:8080"
+    depends_on:
+      - postgres
+    networks:
+      - ho-net
+
+networks:
+  ho-net:

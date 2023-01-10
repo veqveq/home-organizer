@@ -1,0 +1,19 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+    <changeSet id="20230102-0" author="e.vasyakov">
+        <addColumn tableName="recipe">
+            <column name="rating" type="bigint" remarks="Рейтинг"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="20230102-1" author="e.vasyakov">
+        <sql>
+            UPDATE cookbook.recipe
+            SET rating = CASE
+                             WHEN likes is NULL or likes = 0 THEN 0
+                             WHEN dislikes is NULL or dislikes = 0 THEN 100
+                             ELSE likes * 100 / (likes+dislikes)
+                END
+        </sql>
+    </changeSet>
+</databaseChangeLog>
