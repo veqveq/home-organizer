@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {DictionaryService} from "../../services/dictionary.service";
-import {Page} from "../../models/page";
+import {Page} from "../../../core/models/page";
 import {map, tap} from "rxjs";
 
 @Component({
@@ -16,6 +16,7 @@ export class DictionaryRegisterComponent implements OnInit {
     number: number;
     size: number;
     totalPages: number;
+    totalElements: number;
   }
 
   title = 'Справочники';

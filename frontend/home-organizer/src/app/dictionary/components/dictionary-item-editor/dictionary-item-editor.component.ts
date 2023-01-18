@@ -93,7 +93,6 @@ export class DictionaryItemEditorComponent implements OnInit {
 
         if (fld.type == 'Boolean') {
           control = this.fb.control<boolean>(item == 'true')
-          console.log('exist', item, control)
         } else {
           control = this.fb.control(item)
         }

@@ -1,0 +1,55 @@
+<style>
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  input {
+    outline: none;
+  }
+</style>
+
+<div
+  [ngClass]="hasChanges?'bg-lime-200':''"
+  class="p-2 transition ease-in-out duration-500">
+  <div class="flex flex-row min-h-[30px] relative pt-0.5">
+    <h1 class="text-center flex-grow">{{title}}</h1>
+      <button *ngIf="hasChanges"
+              class="font-bold text-xl absolute top-0 right-0"
+              (click)="reset()"
+      >
+        &times;
+      </button>
+  </div>
+  <div class="flex flex-col relative">
+    <div
+      [ngClass]="from!=0?'ml-0':''"
+      class="flex justify-between mx-2.5 absolute w-full ">
+      <input
+        #inputFrom
+        [ngClass]="hasChanges?'bg-lime-200':''"
+        class="flex-grow-0 w-1/6 text-left font-bold transition ease-in-out duration-500"
+        type="number"
+        (focus)="inputFrom.valueAsNumber==0?inputFrom.value='':''"
+        (focusout)="inputFrom.value==''?inputFrom.valueAsNumber=from:''"
+        [(ngModel)]="from"
+        min="from"
+        max="to"/>
+      <input
+        #inputTo
+        class="flex-grow-0 w-5/6 text-right font-bold mr-3.5 transition ease-in-out duration-500"
+        [ngClass]="hasChanges?'bg-lime-200':''"
+        type="number"
+        (focusout)="inputTo.value==''?inputTo.valueAsNumber=to:''"
+        [(ngModel)]="to"
+        min="from"
+        max="to"/>
+    </div>
+    <div class="mt-1">
+      <ng5-slider #slider [(value)]="from" [(highValue)]="to" [options] = "options"></ng5-slider>
+    </div>
+  </div>
+</div>
+
+

@@ -1,0 +1,41 @@
+<style>
+  #dropdown-content{
+    -webkit-transition: height .25s ease;
+    -o-transition: height .25s ease;
+    transition: height .25s ease;
+    overflow: hidden;
+  }
+
+  #dropdown-content:not(.show) {
+    display: none;
+  }
+</style>
+
+<div
+  [ngClass]="[!isOpen()?'rounded-b-md':'', changeCounter > 0?'bg-lime-400':'']"
+  class="px-4 px-2 rounded-t-md border flex flex-row min-h-[46px]">
+  <span
+    (click)="next()"
+    class="text-left text-lg pr-4 pt-1.5 flex-grow cursor-pointer pl-4"
+  >{{title}}</span>
+  <div
+    *ngIf="changeCounter > 0"
+    class=" flex justify-center mr-2 cursor-pointer">
+    <button
+      (click)="doReset()"
+      class="my-2 font-bold text-sm p-1 bg-red-600 rounded-lg text-white">Очистить ({{changeCounter}})
+    </button>
+  </div>
+  <button
+    [ngClass]="isOpen()?'rotate-90':'rotate-0'"
+    (click)="next()"
+    class="font-bold text-2xl pb-1 w-5 text-center transition ease-in-out duration-[.25s]"
+  >>
+  </button>
+</div>
+<div id="dropdown-content" #content>
+  <div
+    class="border-l border-r border-b rounded-b-md">
+    <ng-content></ng-content>
+  </div>
+</div>
