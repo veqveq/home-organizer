@@ -8,7 +8,7 @@ import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
-import ru.veqveq.cookbook.dto.IngredientNameDto;
+import ru.veqveq.cookbook.dto.GroupIngredientNameDto;
 import ru.veqveq.cookbook.model.filter.IngredientFilter;
 import ru.veqveq.cookbook.service.impl.IngredientService;
 
@@ -22,14 +22,14 @@ public class IngredientNameController {
     @GetMapping("/all")
     @PageableAsQueryParam
     @Operation(summary = "Получение реестра ингредиентов")
-    public Page<IngredientNameDto> getRegister(@Parameter(hidden = true) Pageable pageable) {
+    public Page<GroupIngredientNameDto> getRegister(@Parameter(hidden = true) Pageable pageable) {
         return ingredientService.getAll(pageable);
     }
 
     @PostMapping("/filter")
     @PageableAsQueryParam
     @Operation(summary = "Фильтр ингредиентов")
-    public Page<IngredientNameDto> filter(
+    public Page<GroupIngredientNameDto> filter(
             @RequestBody IngredientFilter filter,
             @Parameter(hidden = true) Pageable pageable) {
         return ingredientService.filter(filter,pageable);
