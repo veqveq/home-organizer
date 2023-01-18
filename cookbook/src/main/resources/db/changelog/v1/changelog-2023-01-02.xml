@@ -7,13 +7,8 @@
         </addColumn>
     </changeSet>
     <changeSet id="20230102-1" author="e.vasyakov">
-        <sql>
-            UPDATE cookbook.recipe
-            SET rating = CASE
-                             WHEN likes is NULL or likes = 0 THEN 0
-                             WHEN dislikes is NULL or dislikes = 0 THEN 100
-                             ELSE likes * 100 / (likes+dislikes)
-                END
-        </sql>
+        <sqlFile
+                path="db/changelog/v1/sql/set_recipe_rating.sql"
+        />
     </changeSet>
 </databaseChangeLog>

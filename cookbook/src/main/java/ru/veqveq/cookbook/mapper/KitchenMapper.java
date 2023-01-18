@@ -6,5 +6,5 @@ import ru.veqveq.cookbook.model.entity.Kitchen;
 
 @Mapper
 public interface KitchenMapper {
-    KitchenDto toDto(Kitchen kitchen);
+    KitchenDto toDto(Kitchen source);
 }
