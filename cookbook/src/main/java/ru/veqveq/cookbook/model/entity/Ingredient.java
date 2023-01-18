@@ -25,14 +25,14 @@ public class Ingredient {
     /**
      * Рецепт
      */
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "recipe_id")
     private Recipe recipe;
 
     /**
      * Название ингредиента
      */
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "ingredient_name_id")
     private IngredientName name;
 

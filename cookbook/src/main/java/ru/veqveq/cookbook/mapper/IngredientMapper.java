@@ -11,7 +11,6 @@ import ru.veqveq.cookbook.model.entity.IngredientName;
 public interface IngredientMapper {
     IngredientNameDto toNameDto(IngredientName ingredientName);
 
-    @Mapping(target = "name", source = "name.name")
     @Mapping(target = "unit", source = "unit.name")
     IngredientDto toDto(Ingredient ingredient);
 }

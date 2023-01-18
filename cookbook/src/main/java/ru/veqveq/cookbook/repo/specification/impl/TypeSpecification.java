@@ -11,6 +11,8 @@ import ru.veqveq.cookbook.util.SpecificationUtils;
 public class TypeSpecification extends AbstractSpecification<Type, TypeFilter> {
     @Override
     protected Specification<Type> addFilters(Specification<Type> specification, TypeFilter filter) {
-        return specification.and(SpecificationUtils.searchLike(Type.Fields.name,filter.getName()));
+        return specification
+                .and(SpecificationUtils.searchLike(Type.Fields.name,filter.getName()))
+                .and(SpecificationUtils.searchNotIn(Type.Fields.id,filter.getExcludes()));
     }
 }

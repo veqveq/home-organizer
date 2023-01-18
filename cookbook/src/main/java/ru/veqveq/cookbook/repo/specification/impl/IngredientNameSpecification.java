@@ -11,6 +11,9 @@ import ru.veqveq.cookbook.util.SpecificationUtils;
 public class IngredientNameSpecification extends AbstractSpecification<IngredientName, IngredientFilter> {
     @Override
     protected Specification<IngredientName> addFilters(Specification<IngredientName> specification, IngredientFilter filter) {
-        return specification.and(SpecificationUtils.searchLike(IngredientName.Fields.name,filter.getName()));
+        return specification
+                .and(SpecificationUtils.searchNull(IngredientName.Fields.genericNameId))
+                .and(SpecificationUtils.searchLike(IngredientName.Fields.name,filter.getName()))
+                .and(SpecificationUtils.searchNotIn(IngredientName.Fields.id,filter.getExcludes()));
     }
 }

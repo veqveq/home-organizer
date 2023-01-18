@@ -15,7 +15,7 @@ import ru.veqveq.cookbook.service.impl.IngredientService;
 @Tag(name = "Контроллер ингредиентов")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/ingredient-names")
+@RequestMapping("/api/v1/ingredients")
 public class IngredientNameController {
     private final IngredientService ingredientService;
 
