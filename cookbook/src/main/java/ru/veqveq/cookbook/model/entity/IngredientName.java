@@ -31,15 +31,27 @@ public class IngredientName {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "generic_name_id")
-    private UUID genericNameId;
-
     /**
      * Список ингредиентов
      */
     @EqualsAndHashCode.Exclude
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "name", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<Ingredient> ingredients;
+
+    /**
+     * Обобщенное название ингредиента
+     */
+    @EqualsAndHashCode.Exclude
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "group_ingredient_name_id")
+    private IngredientName groupIngredientName;
+
+    /**
+     * Список название ингредиентов, которые обобщены данным
+     */
+    @EqualsAndHashCode.Exclude
+    @OneToMany(mappedBy = "groupIngredientName", fetch = FetchType.LAZY)
+    private List<IngredientName> childIngredientNames;
 
     public IngredientName(String name) {
         this.name = name;

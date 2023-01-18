@@ -12,7 +12,7 @@ public class IngredientNameSpecification extends AbstractSpecification<Ingredien
     @Override
     protected Specification<IngredientName> addFilters(Specification<IngredientName> specification, IngredientFilter filter) {
         return specification
-                .and(SpecificationUtils.searchNull(IngredientName.Fields.genericNameId))
+                .and(SpecificationUtils.searchNull(IngredientName.Fields.groupIngredientName))
                 .and(SpecificationUtils.searchLike(IngredientName.Fields.name,filter.getName()))
                 .and(SpecificationUtils.searchNotIn(IngredientName.Fields.id,filter.getExcludes()));
     }

@@ -7,13 +7,7 @@ import ru.veqveq.cookbook.model.filter.RecipeFilter;
 import ru.veqveq.cookbook.repo.specification.AbstractSpecification;
 import ru.veqveq.cookbook.util.SpecificationUtils;
 
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Predicate;
 import java.util.List;
-import java.util.UUID;
-
-import static org.springframework.util.CollectionUtils.isEmpty;
 
 @Component
 public class RecipeSpecification extends AbstractSpecification<Recipe, RecipeFilter> {
@@ -40,23 +34,15 @@ public class RecipeSpecification extends AbstractSpecification<Recipe, RecipeFil
                         Recipe.Fields.kitchen,
                         Kitchen.Fields.id,
                         filter.getKitchenIds()))
-                .and(searchByIngredient(filter.getIngredientIds()));
-    }
-
-    private Specification<Recipe> searchByIngredient(
-            List<UUID> ingredientIds
-    ) {
-        return isEmpty(ingredientIds) ? null : (root, query, cb) -> {
-            Join<Object, Object> joinedEntry = root.join(Recipe.Fields.ingredient, JoinType.INNER);
-            Join<Object, Object> joinedEntry2 = joinedEntry.join(Ingredient.Fields.name, JoinType.INNER);
-            Predicate predicate = cb.conjunction();
-            predicate.getExpressions().add(cb.or(
-                    joinedEntry2.get(IngredientName.Fields.id).in(ingredientIds),
-                    joinedEntry2.get(IngredientName.Fields.genericNameId).in(ingredientIds))
-            );
-            query.groupBy(root.get("id"));
-            query.having(cb.equal(cb.count(joinedEntry2.get(IngredientName.Fields.id)), ingredientIds.size()));
-            return predicate;
-        };
+                .and(SpecificationUtils.searchWithJoinCollectionFullIn(
+                        List.of(Recipe.Fields.ingredient, Ingredient.Fields.name),
+                        IngredientName.Fields.id,
+                        filter.getIngredientNameIds()))
+                .and(SpecificationUtils.searchWithJoinCollectionFullIn(
+                        List.of(Recipe.Fields.ingredient,
+                                Ingredient.Fields.name,
+                                IngredientName.Fields.groupIngredientName),
+                        IngredientName.Fields.id,
+                        filter.getIngredientNameIds()));
     }
 }
