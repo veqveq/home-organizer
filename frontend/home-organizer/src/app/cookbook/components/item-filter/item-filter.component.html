@@ -1,0 +1,94 @@
+<style>
+  .scrollbar {
+    overflow-y: scroll
+  }
+
+  .scrollbar::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+
+  #dropdown-content{
+    -webkit-transition: height .25s ease;
+    -o-transition: height .25s ease;
+    transition: height .25s ease;
+    overflow: hidden;
+  }
+
+  #dropdown-content:not(.show) {
+    display: none;
+  }
+</style>
+
+<div
+  [ngClass]="hasChanges?'bg-lime-200':''"
+  class="p-2 transition ease-in-out duration-500 pb-2"
+>
+  <div class="relative">
+    <h1 class="text-center mb-2 pt-0.5">{{title}}
+      <span *ngIf="values.length">({{values.length}})</span>
+    </h1>
+    <button *ngIf="hasChanges"
+            class="font-bold text-xl absolute top-0 right-0"
+            (click)="reset()"
+    >
+      &times;
+    </button>
+  </div>
+  <div
+    class="flex flex-col w-[300px]">
+    <!--Поле ввода-->
+    <input
+      #inputField
+      [ngClass]="filtered.length==0?'font-bold text-red-500':''"
+      class="border-2 px-4 py-2 rounded transition ease-in-out duration-500"
+      placeholder="Название..."
+      (input)="doFilter()"
+      (click)="openMenu()"
+      [(ngModel)]="filter.name"
+      type="text">
+    <!--Список выбранных айтемов-->
+    <div class="relative">
+      <ul class="flex flex-wrap">
+        <li *ngFor="let val of values.reverse(); let i = index"
+            class="ml-0.5 mt-0.5 px-4 py-1 bg-gray-300 text-white border-0 rounded-md flex-auto flex justify-between text-sm">
+          <span>{{val}}</span>
+          <button
+            (click)="delete(i)"
+            class=" text-sm text-white ml-0.5"
+          >x
+          </button>
+        </li>
+      </ul>
+      <!--Выпадающий список-->
+      <div
+        #menu
+        [ngClass]="filtered.length==0?'px-4 py-2':''"
+        (mouseleave)="closeMenu()"
+        id="dropdown-content"
+        class="w-full max-h-60 bg-blue-200 absolute top-0 opacity-90 scrollbar rounded-b-xl z-50 transition ease-in-out duration-500"
+      >
+        <ul
+          #menuList
+          (scroll)="doScroll(menuList)"
+          class="max-h-60 scrollbar">
+          <li
+            [class.active]="i == curElementIndex"
+            [ngClass]="i == curElementIndex?'bg-blue-400 font-bold':''"
+            (click)="saveValue(val); closeMenu()"
+            (mouseover)="curElementIndex=i"
+            class=" px-2 py-2 cursor-pointer"
+            *ngFor="let val of filtered; let i = index"
+          >{{val.name}}</li>
+        </ul>
+        <span
+          *ngIf="filtered.length == 0"
+          class="italic"
+        >
+          Элементы не найдены
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+

@@ -1,0 +1,212 @@
+<style>
+  .scrollbar {
+    overflow-y: scroll
+  }
+
+  .scrollbar::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+</style>
+
+<div class="pl-8">
+  <h1 class="text-center font-bold text-lg mb-4">Рандомайзер рецептов</h1>
+  <div class="flex mb-8">
+    <div class="flex flex-grow pr-4">
+      <input
+        [ngClass]="filter.title?'rounded-l-2xl rounded-r-none bg-lime-200':'rounded-2xl'"
+        type="text"
+        class="border py-2 px-4 flex-grow"
+        placeholder="Поиск рецепта по названию..."
+        [(ngModel)]="filter.title"
+      />
+      <button *ngIf="filter.title"
+              class="font-bold text-[28px] px-4 bg-red-600 text-white rounded-r-2xl"
+              (click)="filter.title=''"
+      >
+        &times;
+      </button>
+    </div>
+
+    <div>
+      <span class="pr-2">Сортировать по: </span>
+      <select class="text-lg px-2 py-2 border rounded-2xl" #sortParam (change)="doFilter()">
+        <option value="title">Название</option>
+        <option value="rating" selected>Рейтинг</option>
+        <option value="cookTime">Время готовки</option>
+        <option value="portions">Порции</option>
+        <option value="kcal">Калорийность</option>
+        <option value="proteins">Белки</option>
+        <option value="fats">Жиры</option>
+        <option value="carbons">Углеводы</option>
+      </select>
+      <button
+        type="button"
+        class="px-4"
+        (click)="changeDirection(); doFilter()"
+      >
+        <span *ngIf="direction=='ASC'" class="text-2xl">↑</span>
+        <span *ngIf="direction=='DESC'" class="text-2xl">↓</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<hr class="h-[3px] bg-slate-500">
+
+
+<div class=" flex flex-row">
+  <!--Список рецептов-->
+  <div
+    class="flex-grow max-h-[1000px] scrollbar">
+    <ul
+      #page
+      (scroll)="doScroll(page)"
+      class="scrollbar max-h-[1000px]">
+      <li *ngFor="let rec of recipes">
+        <app-recipe [recipe]="rec"
+                    [filteredIngredients]="filter.ingredientIds"
+                    (addKitchenFilter)="kitchenOptions.saveValue($event)"
+                    (addCategoryFilter)="categoryOptions.saveValue($event)"
+                    (addTypeFilter)="typeOptions.saveValue($event)"
+                    (addIngredientFilter)="ingredientOptions.saveValue($event)"
+        ></app-recipe>
+      </li>
+    </ul>
+  </div>
+
+  <!--Фильтр-->
+  <div
+    class="flex flex-col justify-start border-l-2 border-slate-500 px-2 py-4">
+    <div >
+      <h1 class="text-center font-bold text-lg ">Фильтр</h1>
+      <p class="text-end">Рецептов: {{totalElements}}</p>
+    </div>
+    <hr class="bg-slate-500">
+    <div class="flex flex-row justify-center  ">
+      <div class="flex flex-col w-125">
+        <app-slider-filter
+          #ratingOptions
+          title="Рейтинг"
+          class="flex-auto"
+          [from]=0 [to]=100
+          (filterFrom)="filter.rating.from = $event"
+          (filterTo)="filter.rating.to = $event"
+        ></app-slider-filter>
+        <app-item-filter
+          #typeOptions
+          title="Тип блюда"
+          endpoint="types"
+          (filterComponents)="filter.typeIds=$event"
+        ></app-item-filter>
+        <app-item-filter
+          #categoryOptions
+          title="Категория блюда"
+          endpoint="categories"
+          (filterComponents)="filter.categoryIds=$event"
+        ></app-item-filter>
+        <app-item-filter
+          #kitchenOptions
+          title="Кухня"
+          endpoint="kitchens"
+          (filterComponents)="filter.kitchenIds=$event"
+        ></app-item-filter>
+        <app-item-filter
+          #ingredientOptions
+          title="Ингредиенты"
+          endpoint="ingredients"
+          (filterComponents)="filter.ingredientIds=$event"
+        ></app-item-filter>
+
+        <!--Дополнительные параметры-->
+        <app-dropdown-tab
+          #additionalOptions
+          (reset)="cookTimeSlider.reset(); portionSlider.reset()"
+          title="Настройки">
+          <app-slider-filter
+            #cookTimeSlider
+            title="Время готовки, минут"
+            class="flex-auto"
+            [from]=0
+            endpoint="cooktime"
+            (filterFrom)="filter.cookTime.from = $event"
+            (filterTo)="filter.cookTime.to = $event"
+            (isChanged)="additionalOptions.hasChanges($event)"
+          ></app-slider-filter>
+          <app-slider-filter
+            #portionSlider
+            title="Количество порций"
+            class="flex-auto"
+            [from]=1
+            endpoint="portions"
+            (filterFrom)="filter.portions.from = $event"
+            (filterTo)="filter.portions.to = $event"
+            (isChanged)="additionalOptions.hasChanges($event)"
+          ></app-slider-filter>
+        </app-dropdown-tab>
+
+        <!--Калорийность-->
+        <app-dropdown-tab
+          #energyOptions
+          (reset)="kcalSlider.reset(); protSlider.reset(); fatSlider.reset(); carbSlider.reset()"
+          title="Калорийность"
+        >
+          <app-slider-filter
+            #kcalSlider
+            title="Калорийность, ккал"
+            class="flex-auto"
+            [from]=0
+            endpoint="kcal"
+            (filterFrom)="filter.kcal.from = $event"
+            (filterTo)="filter.kcal.to = $event"
+            (isChanged)="energyOptions.hasChanges($event)"
+          ></app-slider-filter>
+          <app-slider-filter
+            #protSlider
+            title="Белки, г/100 г"
+            class="flex-auto"
+            [from]=0
+            endpoint="proteins"
+            (filterFrom)="filter.proteins.from = $event"
+            (filterTo)="filter.proteins.to = $event"
+            (isChanged)="energyOptions.hasChanges($event)"
+          ></app-slider-filter>
+          <app-slider-filter
+            #fatSlider
+            title="Жиры, г/100 г"
+            class="flex-auto"
+            [from]=0
+            endpoint="fats"
+            (filterFrom)="filter.fats.from = $event"
+            (filterTo)="filter.fats.to = $event"
+            (isChanged)="energyOptions.hasChanges($event)"
+          ></app-slider-filter>
+          <app-slider-filter
+            #carbSlider
+            title="Углеводы, г/100 г"
+            class="flex-auto"
+            [from]=0
+            endpoint="carbons"
+            (filterFrom)="filter.carbons.from = $event"
+            (filterTo)="filter.carbons.to = $event"
+            (isChanged)="energyOptions.hasChanges($event)"
+          ></app-slider-filter>
+        </app-dropdown-tab>
+        <div class="flex flex-row justify-between pt-6">
+          <button
+            class="font-bold bg-lime-400 px-4 py-2 rounded-[5px] hover:bg-lime-200 transition duration-700 ease-in-out"
+            (click)="doFilter()"
+            type="button">
+            Применить
+          </button>
+          <button
+            class="font-bold bg-red-600 px-4 py-2 rounded-[5px] hover:bg-red-400 transition duration-700 ease-in-out"
+            (click)="reset()"
+            type="button">
+            Очистить
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -2,8 +2,8 @@ import {Injectable} from "@angular/core";
 import {HttpClient, HttpErrorResponse, HttpParams} from "@angular/common/http";
 import {Dictionary} from "../models/dictionary";
 import {catchError, concatMap, map, Observable, retry, tap, throwError} from "rxjs";
-import {Page} from "../models/page";
-import {ErrorService} from "./error.service";
+import {Page} from "../../core/models/page";
+import {ErrorService} from "../../core/services/error.service";
 
 @Injectable({
   providedIn: 'root'

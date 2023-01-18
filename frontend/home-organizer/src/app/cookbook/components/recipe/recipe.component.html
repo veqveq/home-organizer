@@ -1,0 +1,121 @@
+<style>
+  th {
+    padding: 2px 20px;
+    text-align: center;
+  }
+
+  td {
+    text-align: center;
+  }
+</style>
+
+<div class="border rounded-[20px] mx-8 my-8 flex flex-row">
+  <div class="flex-grow px-4 py-4">
+    <div class="flex flex-row justify-between">
+      <a href="{{recipe.url}}" target="_blank">
+        <h1 class="text-[24px] flex-grow">{{recipe.title}}</h1>
+      </a>
+      <div class="flex flex-row ml-10 w-[200px] justify-end">
+        <p class="text-xl mr-6">👍
+          <span class="text-lg">{{recipe.likes}}</span>
+        </p>
+        <p class="text-xl">👎
+          <span class="text-lg">{{recipe.dislikes}}</span>
+        </p>
+      </div>
+    </div>
+    <div class="pl-4 text-lime-800 flex flex-row font-bold mb-2">
+      <span class="cursor-pointer select-none"
+            (click)="addKitchenFilter.emit(recipe.kitchen)">{{recipe.kitchen.name}}</span>
+      <span class="px-1 select-none">⦁</span>
+      <span class="cursor-pointer select-none" (click)="addTypeFilter.emit(recipe.type)">{{recipe.type.name}}</span>
+      <span class="px-1 select-none">⦁</span>
+      <span class="cursor-pointer select-none"
+            (click)="addCategoryFilter.emit(recipe.category)">{{recipe.category.name}}</span>
+    </div>
+    <div
+      class="flex flex-row min-h-[180px]">
+      <!--Картинка-->
+      <a class="min-w-[180px] flex-grow-0 cursor-pointer" href="{{recipe.url}}" target="_blank">
+        <img *ngIf="recipe.imageUrl" src="{{recipe.imageUrl}}" alt=""/>
+        <object *ngIf="!recipe.imageUrl" type="image/svg+xml" data="assets/images/cookbook/alt-img.svg"
+                style="pointer-events: none"
+                class="w-[180px] -z-50"></object>
+      </a>
+      <!--Текст рядом с картинкой-->
+      <div
+        [ngClass]="[isDescription?'border-blue-500':'border-gray-400',recipe.description?'border-t-2':'']"
+        class="w-full flex relative px-4 flex-grow">
+        <!--Калорийность, ингредиенты-->
+        <div
+          [ngClass]="isDescription?'absolute opacity-0 z-0':'opacity-100 z-50'"
+          class="flex flex-col flex-grow transition ease-in-out duration-700 ">
+          <div>
+            <!--Время, порции-->
+            <div class="flex flex-row justify-between mb-2 px-6">
+              <p class="text-2xl">⏱
+                <span class="text-lg">{{recipe.cookTime}} минут</span></p>
+              <p class="text-2xl mr-6">🍽
+                <span class="text-lg">{{recipe.portions}} порции</span></p>
+            </div>
+            <!--Калорийность-->
+            <div class="mb-2">
+              <h1 class="text-center text-xl">Энергетическая ценность на порцию</h1>
+              <table class="w-full">
+                <tr>
+                  <th>Белки</th>
+                  <th>Жиры</th>
+                  <th>Углеводы</th>
+                  <th>Калорийность</th>
+                </tr>
+                <tr>
+                  <td>{{recipe.proteins}} г</td>
+                  <td>{{recipe.fats}} г</td>
+                  <td>{{recipe.carbons}} г</td>
+                  <td>{{recipe.kcal}}</td>
+                </tr>
+              </table>
+            </div>
+            <!--Состав-->
+            <div>
+              <app-dropdown-tab title="Ингредиенты">
+                <ul>
+                  <li
+                    *ngFor="let ingredient of recipe.ingredient"
+                    [ngClass]="isFilteredIngredient(ingredient)?'bg-lime-200':''"
+                    (click)="addIngredientFilter.emit(ingredient.name)"
+                    class="py-2 px-4 flex flex-row border-b group cursor-pointer"
+                  >
+                    <span class="group-hover:font-bold">{{ingredient.name.name}}</span>
+                    <span class="flex-grow"></span>
+                    <span class="">{{ingredient.count}} {{ingredient.unit}}</span>
+                  </li>
+                </ul>
+              </app-dropdown-tab>
+            </div>
+          </div>
+        </div>
+        <!--Описание-->
+        <div
+          [ngClass]="isDescription?'opacity-100 z-50':'absolute opacity-0 z-0' "
+          class="transition ease-in-out duration-700 top-0 select-none cursor-pointer"
+          (click)="nextVisible()">
+          {{recipe.description}}
+        </div>
+      </div>
+      <!--Кнопка Описание-->
+      <div
+        [ngClass]="isDescription?'bg-blue-500':'bg-gray-400'"
+        *ngIf="recipe.description"
+        (click)="nextVisible()"
+        class="rotate-180 flex text-white rounded-l-[20px] cursor-pointer transition ease-in-out duration-700 px-2 max-h-[180px]">
+        <p class="text-center font-bold tracking-wider text-xl" style="writing-mode: vertical-rl">
+          Описание
+        </p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+

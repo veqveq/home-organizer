@@ -3,7 +3,7 @@ import {FormArray, FormBuilder, FormControl, FormGroup, Validators} from "@angul
 import {DictionaryService} from "../../services/dictionary.service";
 import {Dictionary} from "../../models/dictionary";
 import {CreateDictionaryFieldComponent} from "../dictionary-field-editor/dictionary-field-editor.component";
-import {RefDirective} from "../../directives/ref.directive";
+import {RefDirective} from "../../../core/directives/ref.directive";
 import {BehaviorSubject, concatMap, tap} from "rxjs";
 import {DictionaryField} from "../../models/dictionary-field";
 

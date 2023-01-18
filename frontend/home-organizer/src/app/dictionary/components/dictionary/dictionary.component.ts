@@ -1,7 +1,7 @@
 import {Component, EventEmitter, Input, Output, ViewChild} from "@angular/core";
 import {Dictionary} from "../../models/dictionary";
 import {DictionaryService} from "../../services/dictionary.service";
-import {RefDirective} from "../../directives/ref.directive";
+import {RefDirective} from "../../../core/directives/ref.directive";
 import {tap} from "rxjs";
 
 @Component({

@@ -8,8 +8,7 @@ import {DictionaryField} from "../../models/dictionary-field";
 import {ItemFilter} from "../../models/item-filter";
 import {TSMap} from "typescript-map";
 import {map, tap} from "rxjs";
-import {Page} from "../../models/page";
-import loader from "@angular-devkit/build-angular/src/webpack/plugins/single-test-transform";
+import {Page} from "../../../core/models/page";
 
 @Component({
   selector: 'app-dictionary-page',
@@ -24,6 +23,7 @@ export class DictionaryPageComponent implements OnInit {
     number: number;
     size: number;
     totalPages: number;
+    totalElements: number;
   }
 
   dictionary: Dictionary

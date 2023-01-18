@@ -1,12 +1,10 @@
 import {Injectable} from "@angular/core";
-import {catchError, map, Observable, retry, tap, throwError} from "rxjs";
-import {Page} from "../models/page";
+import {catchError, Observable, retry, throwError} from "rxjs";
+import {Page} from "../../core/models/page";
 import {HttpClient, HttpErrorResponse, HttpParams} from "@angular/common/http";
-import {ErrorService} from "./error.service";
+import {ErrorService} from "../../core/services/error.service";
 import {DictionaryItem} from "../models/dictionary-item";
 import {ItemFilter} from "../models/item-filter";
-import {Dictionary} from "../models/dictionary";
-import {formatNumber} from "@angular/common";
 
 @Injectable({
   providedIn: 'root'
