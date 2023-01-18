@@ -7,6 +7,7 @@ import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
 
 import javax.persistence.*;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -28,6 +29,12 @@ public class Type {
      */
     @Column(name = "name")
     private String name;
+
+    /**
+     * Список рецептов
+     */
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "type",orphanRemoval = true)
+    private List<Recipe> recipes;
 
     public Type(@NonNull String name) {
         this.name = name;

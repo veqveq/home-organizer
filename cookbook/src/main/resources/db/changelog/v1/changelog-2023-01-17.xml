@@ -1,7 +1,9 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
-    <include file="db/changelog/v1/changelog-2022-12-21.xml"/>
-    <include file="db/changelog/v1/changelog-2023-01-02.xml"/>
-    <include file="db/changelog/v1/changelog-2023-01-17.xml"/>
+    <changeSet id="20230117-0" author="e.vasyakov">
+        <addColumn tableName="ingredient_name">
+            <column name="generic_name_id" type="uuid" remarks="Идентификатор обобщенного имени"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

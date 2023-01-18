@@ -6,4 +6,6 @@ public interface Parser {
     void parsePages();
 
     Integer deleteDuplicates();
+
+    void optimizeIngredientNames();
 }

@@ -8,8 +8,7 @@ import ru.veqveq.cookbook.model.entity.Recipe;
         CategoryMapper.class,
         IngredientMapper.class,
         KitchenMapper.class,
-        TypeMapper.class,
-        IngredientMapper.class
+        TypeMapper.class
 })
 public interface RecipeMapper {
     RecipeDto toDto(Recipe recipe);

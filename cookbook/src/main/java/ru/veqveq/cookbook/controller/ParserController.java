@@ -33,4 +33,12 @@ public class ParserController {
     public ResponseEntity<String> deleteDuples() {
         return ResponseEntity.ok(String.format("Удалено %d дубликатов", parser.deleteDuplicates()));
     }
+
+    @PostMapping("/optimize-ingrdients")
+    @Operation(summary = "Оптимизация имен ингредентов", description = "Обобщить названия ингредиентов")
+    public ResponseEntity<?> optimizeIngredients(){
+        parser.optimizeIngredientNames();
+        return ResponseEntity.ok().build();
+    }
+
 }

@@ -17,6 +17,7 @@ import ru.veqveq.cookbook.repo.*;
 import ru.veqveq.cookbook.service.Parser;
 import ru.veqveq.cookbook.util.ParserUtils;
 
+import javax.transaction.Transactional;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -57,10 +58,11 @@ public class ParserImpl implements Parser {
         List<Recipe> recipes = recipeRepo.findAllByCompletedIsNull();
         int counter = 0;
         for (Recipe recipe : recipes) {
-            parseRecipePage(recipe);
+            Recipe parsed = parseRecipePage(recipe);
             counter += 1;
-            log.info("Обработано рецептов: {}", counter);
+            log.info("Обработано рецептов: {}. {}", counter, parsed.getTitle());
         }
+        optimizeIngredientNames();
     }
 
     @Override
@@ -71,7 +73,7 @@ public class ParserImpl implements Parser {
         for (Recipe recipe : recipes) {
             if (uniqueUrl.contains(recipe.getUrl())) {
                 recipeRepo.deleteById(recipe.getId());
-                duplicates +=1;
+                duplicates += 1;
             } else {
                 uniqueUrl.add(recipe.getUrl());
             }
@@ -79,7 +81,21 @@ public class ParserImpl implements Parser {
         return duplicates;
     }
 
-    public void parseRecipePage(Recipe recipe) {
+    @Override
+    @Transactional
+    public void optimizeIngredientNames() {
+        List<IngredientName> ingredientNames = ingredientNameRepo.findAll();
+        Map<IngredientName, IngredientName> relationsMap = getRelationsMap(ingredientNames);
+        relationsMap.forEach((child, parent) -> {
+            IngredientName foundParent = getParent(child, relationsMap);
+            if (!child.equals(foundParent)) {
+                child.setGenericNameId(foundParent.getId());
+            }
+        });
+        ingredientNameRepo.saveAll(ingredientNames);
+    }
+
+    private Recipe parseRecipePage(Recipe recipe) {
         Document page = getPage(recipe.getUrl());
         Elements recipePageData = page.getElementsByTag("main");
         recipe.setKcal(ParserUtils.parseKcal(recipePageData));
@@ -90,10 +106,10 @@ public class ParserImpl implements Parser {
         recipe.setCategory(parseCategory(recipePageData));
         parseIngredients(recipePageData, recipe);
         recipe.setCompleted(true);
-        recipeRepo.saveAndFlush(recipe);
+        return recipeRepo.saveAndFlush(recipe);
     }
 
-    public Boolean parseRegisterPage(Document page) {
+    private Boolean parseRegisterPage(Document page) {
         Elements recipes = page.getElementsContainingOwnText("Добавить в книгу рецептов");
         if (recipes.isEmpty()) {
             return true;
@@ -117,6 +133,35 @@ public class ParserImpl implements Parser {
             log.info("Обработано: {}", PARSED_ITEMS);
         }
         return false;
+    }
+
+    private IngredientName getParent(IngredientName child, Map<IngredientName, IngredientName> relationsMap) {
+        IngredientName parent = relationsMap.get(child);
+        if (parent.equals(child)) {
+            return parent;
+        }
+        return getParent(parent, relationsMap);
+    }
+
+    private Map<IngredientName, IngredientName> getRelationsMap(List<IngredientName> namesList) {
+        Map<IngredientName, IngredientName> changesMap = new HashMap<>();
+        for (IngredientName ingredient : namesList) {
+            if (!changesMap.containsKey(ingredient)) {
+                namesList.stream()
+                        .filter(listIngr ->
+                                StringUtils.containsAnyIgnoreCase(listIngr.getName(),
+                                        " " + ingredient.getName() + " ",
+                                        ingredient.getName() + " ",
+                                        " " + ingredient.getName()
+                                )
+                                        || listIngr.equals(ingredient)
+                        ).forEach(filteredIngr -> {
+                            changesMap.put(filteredIngr, ingredient);
+                            log.info("Ингредиент {} обобщён в {}", filteredIngr.getName(), ingredient.getName());
+                        });
+            }
+        }
+        return changesMap;
     }
 
     private Type parseType(Element element) {
@@ -144,31 +189,50 @@ public class ParserImpl implements Parser {
     }
 
     private List<Ingredient> parseIngredients(Elements elements, Recipe recipe) {
+        Map<String, Double> unitsMap = Map.of(
+                "½", 0.5d,
+                "¼", 0.25d,
+                "¾", 0.75d,
+                "⅓", 0.3d,
+                "⅔", 0.6d
+        );
         List<Ingredient> ingredients = new ArrayList<>();
         List<Element> ingredientElements = ParserUtils.getIngredientsData(elements);
-        for (int i = 1; i < ingredientElements.size(); i++) {
-            List<TextNode> nodes = ingredientElements.get(i).getElementsByTag("span").textNodes();
-            String name = nodes.get(0).text();
-            IngredientName ingredientName = ingredientNameRepo.findByName(name).orElseGet(() -> ingredientNameRepo.saveAndFlush(new IngredientName(name)));
-            String capacity = nodes.get(1).text();
-            Double count = null;
-            String unitName;
-            if (capacity.matches("[\\d,]+ \\D+")) {
-                String[] splited = capacity.split("\\s");
-                count = Double.parseDouble(splited[0].replace(",", "."));
-                List<String> unitParts = Arrays.stream(splited).skip(1).collect(Collectors.toList());
-                unitName = StringUtils.join(unitParts, " ").trim();
-            } else {
-                unitName = capacity;
+        for (int i = 0; i < ingredientElements.size(); i++) {
+            try {
+                List<TextNode> nodes = ingredientElements.get(i).getElementsByTag("span").textNodes();
+                String name = nodes.get(0).text();
+                IngredientName ingredientName = ingredientNameRepo.findByName(name).orElseGet(() -> ingredientNameRepo.saveAndFlush(new IngredientName(name)));
+                String capacity = nodes.get(1).text();
+                Double count = null;
+                String unitName;
+                if (capacity.matches("[\\d,]+ \\D+")) {
+                    String[] splited = capacity.split("\\s");
+                    count = Double.parseDouble(splited[0].replace(",", "."));
+                    List<String> unitParts = Arrays.stream(splited).skip(1).collect(Collectors.toList());
+                    unitName = StringUtils.join(unitParts, " ").trim();
+                } else {
+                    unitName = capacity;
+                }
+                String[] unitParts = unitName.split("\\s");
+                String finalUnitName;
+                if (unitsMap.containsKey(unitParts[0])) {
+                    count = Objects.isNull(count) ? unitsMap.get(unitParts[0]) : count + unitsMap.get(unitParts[0]);
+                    finalUnitName = StringUtils.join(unitParts, " ", 1, unitParts.length);
+                } else {
+                    finalUnitName = unitName;
+                }
+                IngredientUnit unit = ingredientUnitRepo.findByName(finalUnitName).orElseGet(() -> ingredientUnitRepo.saveAndFlush(new IngredientUnit(finalUnitName)));
+                Ingredient ingredient = Ingredient.builder()
+                        .recipe(recipe)
+                        .name(ingredientName)
+                        .count(count)
+                        .unit(unit)
+                        .build();
+                ingredients.add(ingredient);
+            } catch (Exception e) {
+                log.error(e.getMessage());
             }
-            IngredientUnit unit = ingredientUnitRepo.findByName(unitName).orElseGet(() -> ingredientUnitRepo.saveAndFlush(new IngredientUnit(unitName)));
-            Ingredient ingredient = Ingredient.builder()
-                    .recipe(recipe)
-                    .name(ingredientName)
-                    .count(count)
-                    .unit(unit)
-                    .build();
-            ingredients.add(ingredient);
         }
 
         return ingredientRepo.saveAllAndFlush(ingredients);

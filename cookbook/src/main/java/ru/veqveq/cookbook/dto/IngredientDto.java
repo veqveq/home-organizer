@@ -11,7 +11,7 @@ public class IngredientDto {
     private UUID id;
 
     @Schema(description = "Название ингредиента")
-    private String name;
+    private IngredientNameDto name;
 
     @Schema(description = "Количество")
     private Double count;

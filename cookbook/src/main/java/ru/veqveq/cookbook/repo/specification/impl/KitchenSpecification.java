@@ -11,6 +11,8 @@ import ru.veqveq.cookbook.util.SpecificationUtils;
 public class KitchenSpecification extends AbstractSpecification<Kitchen, KitchenFilter> {
     @Override
     protected Specification<Kitchen> addFilters(Specification<Kitchen> specification, KitchenFilter filter) {
-        return specification.and(SpecificationUtils.searchLike(Kitchen.Fields.name,filter.getName()));
+        return specification
+                .and(SpecificationUtils.searchLike(Kitchen.Fields.name,filter.getName()))
+                .and(SpecificationUtils.searchNotIn(Kitchen.Fields.id,filter.getExcludes()));
     }
 }

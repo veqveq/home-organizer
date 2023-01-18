@@ -97,12 +97,16 @@ public final class SpecificationUtils {
             Predicate predicate = cb.conjunction();
             predicate.getExpressions().add(joinedEntry2.get(fieldName).in(values));
             query.groupBy(root.get("id"));
-            query.having(cb.equal(cb.count(joinedEntry2.get(fieldName)), values.size()));
+            query.having(cb.equal(cb.count(joinedEntry2.get("id")), values.size()));
             return predicate;
         };
     }
 
     public <T, R> Specification<T> searchNotIn(String fieldName, Collection<R> excludes) {
         return isEmpty(excludes) ? null : (root, query, cb) -> cb.not(root.get(fieldName).in(excludes));
+    }
+
+    public <T> Specification<T> searchNull(String fieldName) {
+        return (root, query, cb) -> cb.isNull(root.get(fieldName));
     }
 }
