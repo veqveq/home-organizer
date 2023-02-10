@@ -3,7 +3,6 @@ package ru.veqveq.cookbook.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -40,7 +39,7 @@ public class ParserImpl implements Parser {
 
     @Override
     public void parseRegister() {
-        Boolean isFinish = false;
+        boolean isFinish = false;
         int startPage = 1;
         while (!isFinish) {
             try {
@@ -89,7 +88,7 @@ public class ParserImpl implements Parser {
         relationsMap.forEach((child, parent) -> {
             IngredientName foundParent = getParent(child, relationsMap);
             if (!child.equals(foundParent)) {
-                child.setGenericNameId(foundParent.getId());
+                child.setGroupIngredientName(foundParent);
             }
         });
         ingredientNameRepo.saveAll(ingredientNames);
@@ -188,7 +187,7 @@ public class ParserImpl implements Parser {
         return kitchenRepo.findByName(kitchenName).orElseGet(() -> kitchenRepo.saveAndFlush(new Kitchen(kitchenName)));
     }
 
-    private List<Ingredient> parseIngredients(Elements elements, Recipe recipe) {
+    private void parseIngredients(Elements elements, Recipe recipe) {
         Map<String, Double> unitsMap = Map.of(
                 "½", 0.5d,
                 "¼", 0.25d,
@@ -198,9 +197,9 @@ public class ParserImpl implements Parser {
         );
         List<Ingredient> ingredients = new ArrayList<>();
         List<Element> ingredientElements = ParserUtils.getIngredientsData(elements);
-        for (int i = 0; i < ingredientElements.size(); i++) {
+        for (Element ingredientElement : ingredientElements) {
             try {
-                List<TextNode> nodes = ingredientElements.get(i).getElementsByTag("span").textNodes();
+                List<TextNode> nodes = ingredientElement.getElementsByTag("span").textNodes();
                 String name = nodes.get(0).text();
                 IngredientName ingredientName = ingredientNameRepo.findByName(name).orElseGet(() -> ingredientNameRepo.saveAndFlush(new IngredientName(name)));
                 String capacity = nodes.get(1).text();
@@ -234,8 +233,7 @@ public class ParserImpl implements Parser {
                 log.error(e.getMessage());
             }
         }
-
-        return ingredientRepo.saveAllAndFlush(ingredients);
+        ingredientRepo.saveAllAndFlush(ingredients);
     }
 
     private Document getPage(String endpoint, Integer pageNumber) throws IOException {
@@ -254,7 +252,6 @@ public class ParserImpl implements Parser {
 
     private Document getPage(String url) {
         try {
-            Connection connection = Jsoup.connect(url);
             return Jsoup.connect(url).get();
         } catch (IOException e) {
             log.error("Reconnect...");

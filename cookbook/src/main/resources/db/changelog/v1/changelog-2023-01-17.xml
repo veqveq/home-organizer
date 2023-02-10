@@ -3,7 +3,11 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
     <changeSet id="20230117-0" author="e.vasyakov">
         <addColumn tableName="ingredient_name">
-            <column name="generic_name_id" type="uuid" remarks="Идентификатор обобщенного имени"/>
+            <column name="group_ingredient_name_id" type="uuid" remarks="Идентификатор обобщенного имени"/>
         </addColumn>
+        <addForeignKeyConstraint baseTableName="ingredient_name" baseColumnNames="group_ingredient_name_id"
+                                 constraintName="fk_name_group_name"
+                                 referencedTableName="ingredient_name"
+                                 referencedColumnNames="id"/>
     </changeSet>
 </databaseChangeLog>

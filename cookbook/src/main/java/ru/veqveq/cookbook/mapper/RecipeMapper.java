@@ -11,5 +11,5 @@ import ru.veqveq.cookbook.model.entity.Recipe;
         TypeMapper.class
 })
 public interface RecipeMapper {
-    RecipeDto toDto(Recipe recipe);
+    RecipeDto toDto(Recipe source);
 }

@@ -6,5 +6,5 @@ import ru.veqveq.cookbook.model.entity.Category;
 
 @Mapper
 public interface CategoryMapper {
-    CategoryDto toDto(Category category);
+    CategoryDto toDto(Category source);
 }

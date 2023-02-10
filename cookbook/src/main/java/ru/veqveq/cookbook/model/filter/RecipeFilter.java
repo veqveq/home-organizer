@@ -42,6 +42,9 @@ public class RecipeFilter {
     @Schema(description = "Кухни")
     private List<UUID> kitchenIds;
 
-    @Schema(description = "Ингредиенты")
-    private List<UUID> ingredientIds;
+    @Schema(description = "Названия ингредиентов")
+    private List<UUID> ingredientNameIds;
+
+    @Schema(description = "Названия обобщенных ингредиентов")
+    private List<UUID> groupIngredientNameIds;
 }

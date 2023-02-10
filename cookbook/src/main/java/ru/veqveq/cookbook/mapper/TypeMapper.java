@@ -6,5 +6,5 @@ import ru.veqveq.cookbook.model.entity.Type;
 
 @Mapper
 public interface TypeMapper {
-    TypeDto toDto(Type type);
+    TypeDto toDto(Type source);
 }
