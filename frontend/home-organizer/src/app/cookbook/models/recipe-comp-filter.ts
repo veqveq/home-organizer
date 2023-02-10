@@ -1,4 +1,4 @@
 export interface RecipeCompFilter {
   name: string
-  excludes: string[]
+  excludes?: string[]
 }

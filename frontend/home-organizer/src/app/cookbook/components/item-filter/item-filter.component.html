@@ -64,7 +64,6 @@
       <div
         #menu
         [ngClass]="filtered.length==0?'px-4 py-2':''"
-        (mouseleave)="closeMenu()"
         id="dropdown-content"
         class="w-full max-h-60 bg-blue-200 absolute top-0 opacity-90 scrollbar rounded-b-xl z-50 transition ease-in-out duration-500"
       >
@@ -75,14 +74,13 @@
           <li
             [class.active]="i == curElementIndex"
             [ngClass]="i == curElementIndex?'bg-blue-400 font-bold':''"
-            (click)="saveValue(val); closeMenu()"
+            (click)="saveValue(val)"
             (mouseover)="curElementIndex=i"
             class=" px-2 py-2 cursor-pointer"
             *ngFor="let val of filtered; let i = index"
           >{{val.name}}</li>
         </ul>
         <span
-          *ngIf="filtered.length == 0"
           class="italic"
         >
           Элементы не найдены

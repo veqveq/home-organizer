@@ -8,8 +8,10 @@ export class DropdownTabComponent implements OnInit {
   @ViewChild('content') content: ElementRef
   @Output() reset = new EventEmitter()
   @Input() title: string
+  @Input() enabled: Boolean = true
+  @Input() openOnlyButton: Boolean = false
 
-  private dropdown: boolean = false
+  public dropdown: boolean = false
   changeCounter: number = 0
 
   constructor() {
@@ -35,10 +37,6 @@ export class DropdownTabComponent implements OnInit {
     this.reset.emit()
   }
 
-  next() {
-    this.nextDropdown()
-  }
-
   nextDropdown(){
     if (!this.content.nativeElement.classList.contains('show')) {
       this.openList()
@@ -48,7 +46,6 @@ export class DropdownTabComponent implements OnInit {
   }
 
   private openList(){
-    console.log('open')
     this.dropdown = true
     let dropdownContent = this.content.nativeElement
     dropdownContent.classList.add('show');
@@ -61,7 +58,6 @@ export class DropdownTabComponent implements OnInit {
   }
 
   private closeList(){
-    console.log('close')
     this.dropdown = false
     let dropdownContent = this.content.nativeElement
     dropdownContent.style.height = '0px';

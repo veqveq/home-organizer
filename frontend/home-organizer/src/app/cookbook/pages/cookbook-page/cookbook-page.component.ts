@@ -23,7 +23,7 @@ export class CookbookPageComponent implements OnInit {
   @ViewChild('sortParam') sortParam: ElementRef
   @ViewChild('page') recipeList: ElementRef
 
-  filter: RecipeFilter = this.initNewFilter()
+  filter: RecipeFilter = new RecipeFilter();
   page: number = 0
   totalPages: number
   totalElements: number
@@ -40,46 +40,8 @@ export class CookbookPageComponent implements OnInit {
     this.doFilter()
   }
 
-  initNewFilter(): RecipeFilter {
-    return new class implements RecipeFilter {
-      carbons: ValInterval<number> = new class implements ValInterval<number> {
-        from: number;
-        to: number;
-      };
-      categoryIds: string[];
-      cookTime: ValInterval<number> = new class implements ValInterval<number> {
-        from: number;
-        to: number;
-      };
-      fats: ValInterval<number> = new class implements ValInterval<number> {
-        from: number;
-        to: number;
-      };
-      ingredientIds: string[];
-      kcal: ValInterval<number> = new class implements ValInterval<number> {
-        from: number;
-        to: number;
-      };
-      kitchenIds: string[];
-      portions: ValInterval<number> = new class implements ValInterval<number> {
-        from: number;
-        to: number;
-      };
-      proteins: ValInterval<number> = new class implements ValInterval<number> {
-        from: number;
-        to: number;
-      };
-      rating: ValInterval<number> = new class implements ValInterval<number> {
-        from: number;
-        to: number;
-      };
-      title: string;
-      typeIds: string[];
-    }
-  }
-
   reset() {
-    this.filter = this.initNewFilter()
+    this.filter = new RecipeFilter()
     this.ratingOptions.reset()
     this.typeOptions.reset()
     this.categoryOptions.reset()

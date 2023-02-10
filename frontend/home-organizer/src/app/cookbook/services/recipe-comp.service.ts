@@ -18,8 +18,8 @@ export class RecipeCompService {
   ) {
   }
 
-  doFilter(filter: RecipeCompFilter, endpoint: string, page: number): Observable<Page<RecipeComp>> {
-    return this.http.post<Page<RecipeComp>>(this.ROOT_API + '/' + endpoint + '/filter', filter,{
+  doFilter(filter: RecipeCompFilter, endpoint: string, page: number): Observable<Page<any>> {
+    return this.http.post<Page<any>>(this.ROOT_API + '/' + endpoint + '/filter', filter,{
       params: new HttpParams({
         fromObject: {
           page: page ? page : '',

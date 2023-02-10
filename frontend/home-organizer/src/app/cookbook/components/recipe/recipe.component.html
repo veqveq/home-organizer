@@ -9,11 +9,11 @@
   }
 </style>
 
-<div class="border rounded-[20px] mx-8 my-8 flex flex-row">
+<div class="border rounded-[20px] mx-8 my-8 flex flex-row cursor-default">
   <div class="flex-grow px-4 py-4">
     <div class="flex flex-row justify-between">
       <a href="{{recipe.url}}" target="_blank">
-        <h1 class="text-[24px] flex-grow">{{recipe.title}}</h1>
+        <h1 class="text-[24px] flex-grow hover:text-blue-500 hover:translate-x-5 transition ease-in-out duration-500">{{recipe.title}}</h1>
       </a>
       <div class="flex flex-row ml-10 w-[200px] justify-end">
         <p class="text-xl mr-6">👍
@@ -25,19 +25,20 @@
       </div>
     </div>
     <div class="pl-4 text-lime-800 flex flex-row font-bold mb-2">
-      <span class="cursor-pointer select-none"
-            (click)="addKitchenFilter.emit(recipe.kitchen)">{{recipe.kitchen.name}}</span>
+      <span class="cursor-pointer select-none hover:text-lime-500 hover:scale-105 transition ease-in-out duration-200"
+            (click)="addKitchen.emit(recipe.kitchen)">{{recipe.kitchen.name}}</span>
       <span class="px-1 select-none">⦁</span>
-      <span class="cursor-pointer select-none" (click)="addTypeFilter.emit(recipe.type)">{{recipe.type.name}}</span>
+      <span class="cursor-pointer select-none hover:text-lime-500 hover:scale-105 transition ease-in-out duration-200"
+            (click)="addType.emit(recipe.type)">{{recipe.type.name}}</span>
       <span class="px-1 select-none">⦁</span>
-      <span class="cursor-pointer select-none"
-            (click)="addCategoryFilter.emit(recipe.category)">{{recipe.category.name}}</span>
+      <span class="cursor-pointer select-none hover:text-lime-500 hover:scale-105 transition ease-in-out duration-200"
+            (click)="addCategory.emit(recipe.category)">{{recipe.category.name}}</span>
     </div>
     <div
       class="flex flex-row min-h-[180px]">
       <!--Картинка-->
-      <a class="min-w-[180px] flex-grow-0 cursor-pointer" href="{{recipe.url}}" target="_blank">
-        <img *ngIf="recipe.imageUrl" src="{{recipe.imageUrl}}" alt=""/>
+      <a class="min-w-[180px] flex-grow-0 cursor-pointer " href="{{recipe.url}}" target="_blank">
+        <img *ngIf="recipe.imageUrl" src="{{recipe.imageUrl}}" alt="" class="hover:scale-105 hover:absolute transition ease-in-out duration-500"/>
         <object *ngIf="!recipe.imageUrl" type="image/svg+xml" data="assets/images/cookbook/alt-img.svg"
                 style="pointer-events: none"
                 class="w-[180px] -z-50"></object>
@@ -83,8 +84,8 @@
                   <li
                     *ngFor="let ingredient of recipe.ingredient"
                     [ngClass]="isFilteredIngredient(ingredient)?'bg-lime-200':''"
-                    (click)="addIngredientFilter.emit(ingredient.name)"
-                    class="py-2 px-4 flex flex-row border-b group cursor-pointer"
+                    (click)="isFilteredIngredient(ingredient)?removeIngredient.emit(ingredient.name):addIngredient.emit(ingredient.name)"
+                    class="py-2 px-4 flex flex-row border-b group cursor-pointer truncate ease-in-out duration-500"
                   >
                     <span class="group-hover:font-bold">{{ingredient.name.name}}</span>
                     <span class="flex-grow"></span>

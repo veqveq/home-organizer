@@ -1,0 +1,126 @@
+<style>
+  .scrollbar {
+    overflow-y: scroll
+  }
+
+  .scrollbar::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+
+  #dropdown-content {
+    -webkit-transition: height .25s ease;
+    -o-transition: height .25s ease;
+    transition: height .25s ease;
+    overflow: hidden;
+  }
+
+  #dropdown-content:not(.show) {
+    display: none;
+  }
+</style>
+
+<div
+  [ngClass]="getTotalPickedValuesCount()?'bg-lime-200':''"
+  class="p-2 transition ease-in-out duration-500 pb-2"
+>
+  <div class="relative">
+    <h1 class="text-center mb-2 pt-0.5">{{title}}
+      <span *ngIf="getTotalPickedValuesCount()">({{getTotalPickedValuesCount()}})</span>
+    </h1>
+    <button *ngIf="getTotalPickedValuesCount()"
+            class="font-bold text-xl absolute top-0 right-0"
+            (click)="reset()"
+    >
+      &times;
+    </button>
+  </div>
+  <div
+    class="flex flex-col w-[300px]">
+    <!--Поле ввода-->
+    <input
+      #inputField
+      [ngClass]="groups.length==0?'font-bold text-red-500':''"
+      class="border-2 px-4 py-2 rounded transition ease-in-out duration-500"
+      placeholder="Название..."
+      (input)="doFilter()"
+      (click)="openMenu()"
+      [(ngModel)]="filter.name"
+      type="text">
+    <!--Список выбранных айтемов-->
+    <div class="relative">
+      <ul class="flex flex-wrap">
+        <li *ngFor="let entry of pickedValues.values()"
+            class="flex flex-wrap">
+          <p
+            *ngFor="let val of entry"
+            class="ml-0.5 mt-0.5 px-4 py-1 bg-gray-300 text-white border-0 rounded-md flex-auto flex justify-between text-sm"
+          >
+            <span>{{val.name}}</span>
+            <button
+              (click)="returnIngredient(val)"
+              class=" text-sm text-white ml-0.5"
+            >x
+            </button>
+          </p>
+        </li>
+      </ul>
+      <!--Выпадающий список-->
+      <div
+        #menu
+        [ngClass]="groups.length==0?'px-4 py-2':''"
+        id="dropdown-content"
+        class="w-full bg-blue-200 absolute top-0 opacity-90 scrollbar rounded-b-xl z-50 transition ease-in-out duration-500"
+      >
+        <ul
+          #menuList
+          (scroll)="doScroll(menuList)"
+          class="max-h-60 scrollbar flex flex-col">
+          <li
+            [class.active]="i == curElementIndex"
+            [ngClass]="[i == curElementIndex?'bg-blue-400 font-bold':'', group.hidden?'hidden':'']"
+            (mouseover)="curElementIndex=i"
+            class="cursor-pointer "
+            *ngFor="let group of groups; let i = index"
+          >
+            <!--Группа ингредиентов-->
+            <app-dropdown-tab
+              #dropdownTab
+              (click)="group.childIngredientNames.length == 0?pickGroup(group):''"
+              [title]="!dropdownTab.dropdown?group.name:''"
+              [enabled]="getNotPickedFromGroupCount(group) > 0"
+              class="relative"
+            >
+              <!--Кнопка "Выбрать все"-->
+              <button
+                *ngIf="dropdownTab.dropdown"
+                (click)="pickGroup(group); dropdownTab.nextDropdown()"
+                class="absolute text-lg top-1.5 left-6"
+              >
+                Выбрать все
+              </button>
+              <!--Список ингредиентов в группе-->
+              <ul>
+                <li
+                  class="bg-amber-200 pl-10 py-1 font-normal hover:font-bold hover:bg-amber-400"
+                  (click)="pickIngredient(ingredient,group); getNotPickedFromGroupCount(group) == 0?dropdownTab.nextDropdown():''"
+                  [ngClass]="ingredient.hidden?'hidden':''"
+                  *ngFor="let ingredient of group.childIngredientNames"
+                >
+                  {{ingredient.name}}
+                </li>
+              </ul>
+            </app-dropdown-tab>
+          </li>
+        </ul>
+        <span
+          *ngIf="groups.length == 0"
+          class="italic"
+        >
+          Элементы не найдены
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+
