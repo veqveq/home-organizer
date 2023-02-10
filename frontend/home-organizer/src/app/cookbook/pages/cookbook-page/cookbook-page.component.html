@@ -65,11 +65,12 @@
       class="scrollbar max-h-[1000px]">
       <li *ngFor="let rec of recipes">
         <app-recipe [recipe]="rec"
-                    [filteredIngredients]="filter.ingredientIds"
-                    (addKitchenFilter)="kitchenOptions.saveValue($event)"
-                    (addCategoryFilter)="categoryOptions.saveValue($event)"
-                    (addTypeFilter)="typeOptions.saveValue($event)"
-                    (addIngredientFilter)="ingredientOptions.saveValue($event)"
+                    [filteredIngredients]="filter.ingredients"
+                    (addKitchen)="kitchenOptions.saveValue($event)"
+                    (addCategory)="categoryOptions.saveValue($event)"
+                    (addType)="typeOptions.saveValue($event)"
+                    (addIngredient)="ingredientOptions.pickIngredient($event)"
+                    (removeIngredient)="ingredientOptions.returnIngredient($event)"
         ></app-recipe>
       </li>
     </ul>
@@ -111,12 +112,12 @@
           endpoint="kitchens"
           (filterComponents)="filter.kitchenIds=$event"
         ></app-item-filter>
-        <app-item-filter
+        <app-ingredient-filter
           #ingredientOptions
           title="Ингредиенты"
           endpoint="ingredients"
-          (filterComponents)="filter.ingredientIds=$event"
-        ></app-item-filter>
+          (filterComponents)="filter.ingredients=$event"
+        ></app-ingredient-filter>
 
         <!--Дополнительные параметры-->
         <app-dropdown-tab

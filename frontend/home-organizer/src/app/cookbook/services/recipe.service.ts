@@ -20,6 +20,7 @@ export class RecipeService {
   }
 
   filter(filter: RecipeFilter, sort: string, page: number): Observable<Page<Recipe>> {
+    console.log(filter)
     return this.http.post<Page<Recipe>>(this.ROOT_API + '/filter', filter, {
       params: new HttpParams({
         fromObject: {

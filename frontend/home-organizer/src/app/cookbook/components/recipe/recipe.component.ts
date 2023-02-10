@@ -1,6 +1,8 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {Recipe} from "../../models/recipe";
 import {Ingredient} from "../../models/ingredient";
+import {RecipeComp} from "../../models/recipe-comp";
+import {TSMap} from "typescript-map";
 
 @Component({
   selector: 'app-recipe',
@@ -8,11 +10,12 @@ import {Ingredient} from "../../models/ingredient";
 })
 export class RecipeComponent implements OnInit {
   @Input() recipe: Recipe
-  @Input() filteredIngredients: string[]
-  @Output() addKitchenFilter = new EventEmitter()
-  @Output() addTypeFilter = new EventEmitter()
-  @Output() addCategoryFilter = new EventEmitter()
-  @Output() addIngredientFilter = new EventEmitter()
+  @Input() filteredIngredients: TSMap<string, RecipeComp[]>
+  @Output() addKitchen = new EventEmitter()
+  @Output() addType = new EventEmitter()
+  @Output() addCategory = new EventEmitter()
+  @Output() addIngredient = new EventEmitter()
+  @Output() removeIngredient = new EventEmitter()
   isDescription: boolean = false
 
   constructor() {
@@ -21,13 +24,15 @@ export class RecipeComponent implements OnInit {
   ngOnInit(): void {
   }
 
-  nextVisible(){
+  nextVisible() {
     this.isDescription = !this.isDescription
   }
 
-  isFilteredIngredient(ingredient: Ingredient){
-    if (this.filteredIngredients){
-      return this.filteredIngredients.findIndex(value => value === ingredient.name.id) !== -1
+  isFilteredIngredient(ingredient: Ingredient) {
+    for(let list of Array.from(this.filteredIngredients.values())){
+      if (list.map(value => value.id).indexOf(ingredient.name.id)>-1){
+        return true
+      }
     }
     return false
   }

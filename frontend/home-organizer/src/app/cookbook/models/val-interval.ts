@@ -1,4 +1,4 @@
-export interface ValInterval<T> {
-  from?: T,
-  to?: T
+export class ValInterval<T> {
+  from?: T;
+  to?: T;
 }

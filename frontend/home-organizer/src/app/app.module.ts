@@ -23,6 +23,7 @@ import { Ng5SliderModule } from 'ng5-slider';
 import { SliderFilterComponent } from './cookbook/components/slider-filter/slider-filter.component';
 import { ItemFilterComponent } from './cookbook/components/item-filter/item-filter.component';
 import { DropdownTabComponent } from './core/components/dropdown-tab/dropdown-tab.component';
+import { IngredientFilterComponent } from './cookbook/components/ingredient-filter/ingredient-filter.component';
 
 @NgModule({
   declarations: [
@@ -43,7 +44,8 @@ import { DropdownTabComponent } from './core/components/dropdown-tab/dropdown-ta
     RecipeComponent,
     SliderFilterComponent,
     ItemFilterComponent,
-    DropdownTabComponent
+    DropdownTabComponent,
+    IngredientFilterComponent,
   ],
   imports: [
     BrowserModule,

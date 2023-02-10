@@ -1,4 +1,12 @@
-import {Component, ElementRef, EventEmitter, Input, OnInit, Output, Renderer2, ViewChild} from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  EventEmitter, HostListener,
+  Input,
+  OnInit,
+  Output,
+  ViewChild
+} from '@angular/core';
 import {RecipeCompFilter} from "../../models/recipe-comp-filter";
 import {RecipeCompService} from "../../services/recipe-comp.service";
 import {map, tap} from "rxjs";
@@ -30,15 +38,24 @@ export class ItemFilterComponent implements OnInit {
   hasChanges: boolean = false
 
   constructor(
+    private eRef: ElementRef,
     private service: RecipeCompService,
   ) {
+  }
+
+  @HostListener('document:click', ['$event'])
+  clickout(event) {
+    if(!this.eRef.nativeElement.contains(event.target)) {
+      if (this.showList){
+        this.closeMenu()
+      }
+    }
   }
 
   ngOnInit(): void {
     this.doFilter()
     addEventListener('keyup', ev => {
       if (this.showList) {
-        // let menu = document.getElementById("menuList")
         let menu = this.menuList.nativeElement
         if (ev.key == 'ArrowDown') {
           this.curElementIndex++
@@ -123,7 +140,6 @@ export class ItemFilterComponent implements OnInit {
 
   openMenu() {
     this.showList = true
-
     let dropdownContent = this.menu.nativeElement
     dropdownContent.classList.add('show');
     dropdownContent.style.height = 'auto';
@@ -137,7 +153,6 @@ export class ItemFilterComponent implements OnInit {
   closeMenu() {
     this.showList = false
     this.curElementIndex = 0
-
     let dropdownContent = this.menu.nativeElement
     dropdownContent.style.height = '0px';
     dropdownContent.addEventListener('transitionend',
@@ -152,30 +167,6 @@ export class ItemFilterComponent implements OnInit {
     if (menuList.scrollHeight - menuList.scrollTop === menuList.clientHeight) {
       this.doFilterNextPage()
     }
-  }
-
-  openList(menu: ElementRef = this.menu){
-    console.log('open')
-    let dropdownContent = menu.nativeElement
-    dropdownContent.classList.add('show');
-    dropdownContent.style.height = 'auto';
-    var height = dropdownContent.clientHeight + 'px';
-    dropdownContent.style.height = '0px';
-    setTimeout(function () {
-      dropdownContent.style.height = height;
-    }, 0);
-  }
-
-  closeList(menu: ElementRef = this.menu){
-    console.log('close')
-    let dropdownContent = menu.nativeElement
-    dropdownContent.style.height = '0px';
-    dropdownContent.addEventListener('transitionend',
-      function () {
-        dropdownContent.classList.remove('show');
-      }, {
-        once: true
-      });
   }
 }
 
