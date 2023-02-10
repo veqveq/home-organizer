@@ -2,9 +2,11 @@ package ru.veqveq.cookbook.model.filter;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import ru.veqveq.cookbook.dto.IngredientNameDto;
 import ru.veqveq.cookbook.model.ValueInterval;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Data
@@ -43,8 +45,5 @@ public class RecipeFilter {
     private List<UUID> kitchenIds;
 
     @Schema(description = "Названия ингредиентов")
-    private List<UUID> ingredientNameIds;
-
-    @Schema(description = "Названия обобщенных ингредиентов")
-    private List<UUID> groupIngredientNameIds;
+    private Map<UUID,List<IngredientNameDto>> ingredients;
 }
