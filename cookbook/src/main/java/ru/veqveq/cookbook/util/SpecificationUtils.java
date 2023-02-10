@@ -49,50 +49,25 @@ public final class SpecificationUtils {
 
     /**
      * Предоставляет возможность поиска вхождения в массиве значений по полю внутри вложенного объекта. Тип INNER.
-     * Пример: объект Order содержит внутри себя список объектов ObjectCard и внутри есть поле status.
-     * В качестве проверяемых значений передадут несколько статусов [ObjectStatus.DRAFT, ObjectStatus.ERROR]
-     * в результате будет фильтрация по статусам.
+     * Пример: объект Recipe содержит внутри себя список объектов Ingredient и внутри есть поле IngredientName и внутри есть поле id.
+     * В качестве проверяемых значений передадут несколько ID [1,2,3]
+     * в результате будет фильтрация рецептов по вхождению идентификаторов названий ингредиентов в список.
      *
-     * @param joinObjectFieldName имя поля внутри корневого объекта, ссылающегося на объект/таблицу с которой будет происходить join
-     * @param fieldName           имя поля которое будет учавствовать в поиске по вхождению в массив значений
-     * @param values              список значений которое может принимать поле
-     * @param <T>                 тип с которым работает спецификация
-     * @param <R>                 тип данных в коллекции
+     * @param joinObjectFieldNames путь до поля fieldName (от корневой сущности к целевой)
+     * @param fieldName            имя поля которое будет участвовать в поиске по вхождению в массив значений
+     * @param values               список значений которое может принимать поле
+     * @param <T>                  тип с которым работает спецификация
+     * @param <R>                  тип данных в коллекции
      * @return типизированную спецификацию
      */
     public <T, R> Specification<T> searchInJoinedObjectIn(
-            String joinObjectFieldName,
+            List<String> joinObjectFieldNames,
             String fieldName,
             Collection<R> values
     ) {
         return isEmpty(values) ? null : (root, query, criteriaBuilder) -> {
-            Join<T, Object> objectCards = root.join(joinObjectFieldName);
-            return objectCards.get(fieldName).in(values);
-        };
-    }
-
-    /**
-     * Предоставляет возможность поиска по равенству числового значения во внутреннем объекте,
-     * пользуя join. Тип INNER
-     * Пример : объект Order содержит внутри себя список объектов ObjectCard, который содержит объект CopyrightHolder,
-     * внутри которого есть поле copyrightHolderId.
-     * В качестве значения для поиска будет передан copyrightHolderId. В результате будет фильтрация по равенству числового значения
-     *
-     * @param joinedObjectFieldNames путь до поля fieldName (от корневой сущности к целевой)
-     * @param fieldName              имя поля которое будет участвовать для сравнения по частичному вхождению
-     * @param values                 список значений которое может принимать поле
-     * @param <T>                    тип объекта с которым работает спецификация
-     * @param <R>                    тип данных в коллекции
-     * @return типизированную спецификацию
-     */
-    public <T, R> Specification<T> searchWithJoinCollectionFullIn(
-            List<String> joinedObjectFieldNames,
-            String fieldName,
-            Collection<R> values
-    ) {
-        return isEmpty(values) ? null : (root, query, cb) -> {
             Join<Object, Object> joinedEntry = null;
-            for (String joinedObjFldName : joinedObjectFieldNames) {
+            for (String joinedObjFldName : joinObjectFieldNames) {
                 if (Objects.isNull(joinedEntry)) {
                     joinedEntry = root.join(joinedObjFldName, JoinType.INNER);
                 } else {
@@ -102,11 +77,7 @@ public final class SpecificationUtils {
             if (Objects.isNull(joinedEntry)) {
                 return null;
             }
-            Predicate predicate = cb.conjunction();
-            predicate.getExpressions().add(joinedEntry.get(fieldName).in(values));
-            query.groupBy(root.get("id"));
-            query.having(cb.equal(cb.count(joinedEntry.get("id")), values.size()));
-            return predicate;
+            return joinedEntry.get(fieldName).in(values);
         };
     }
 
