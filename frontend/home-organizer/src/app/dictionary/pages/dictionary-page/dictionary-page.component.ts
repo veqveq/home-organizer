@@ -1,4 +1,4 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Params} from "@angular/router";
 import {DictionaryService} from "../../services/dictionary.service";
 import {Dictionary} from "../../models/dictionary";

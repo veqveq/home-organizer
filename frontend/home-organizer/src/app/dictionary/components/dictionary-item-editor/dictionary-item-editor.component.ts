@@ -4,14 +4,7 @@ import {ItemService} from "../../services/item.service";
 import {TSMap} from "typescript-map";
 import {BehaviorSubject, map, Observable, tap} from "rxjs";
 import {DictionaryPageComponent} from "../../pages/dictionary-page/dictionary-page.component";
-import {
-  FormArray,
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  ValidationErrors,
-  Validators
-} from "@angular/forms";
+import {FormArray, FormBuilder, FormControl, FormGroup, ValidationErrors, Validators} from "@angular/forms";
 import {DictionaryField} from "../../models/dictionary-field";
 import {ValidationService} from "../../services/validation.service";
 

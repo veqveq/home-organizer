@@ -6,7 +6,8 @@ import {
   KeyValueDiffer,
   KeyValueDiffers,
   OnInit,
-  Output, ViewChild
+  Output,
+  ViewChild
 } from '@angular/core';
 import {Options} from "ng5-slider";
 import {RecipeService} from "../../services/recipe.service";
