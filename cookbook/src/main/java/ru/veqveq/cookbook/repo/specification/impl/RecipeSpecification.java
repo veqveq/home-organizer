@@ -2,7 +2,6 @@ package ru.veqveq.cookbook.repo.specification.impl;
 
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
-import ru.veqveq.cookbook.dto.IngredientNameDto;
 import ru.veqveq.cookbook.model.entity.*;
 import ru.veqveq.cookbook.model.filter.RecipeFilter;
 import ru.veqveq.cookbook.repo.specification.AbstractSpecification;
@@ -11,7 +10,6 @@ import ru.veqveq.cookbook.util.SpecificationUtils;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Component
 public class RecipeSpecification extends AbstractSpecification<Recipe, RecipeFilter> {
@@ -42,11 +40,15 @@ public class RecipeSpecification extends AbstractSpecification<Recipe, RecipeFil
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private Specification<Recipe> addIngredientFilter(Map<UUID, List<IngredientNameDto>> ingredientsMap){
-        return ingredientsMap.values().stream().map(name->(Specification)SpecificationUtils.searchInJoinedObjectIn(
-                List.of(Recipe.Fields.ingredient, Ingredient.Fields.name),
-                IngredientName.Fields.id,
-                name.stream().map(IngredientNameDto::getId).collect(Collectors.toList())
-        )).reduce((s1,s2)->s1.and(s2)).orElse(null);
+    private Specification<Recipe> addIngredientFilter(Map<UUID, List<UUID>> ingredientsMap) {
+        return ingredientsMap.values()
+                .stream()
+                .map(name ->
+                        (Specification) SpecificationUtils.searchInJoinedObjectIn(
+                                List.of(Recipe.Fields.ingredient, Ingredient.Fields.name),
+                                IngredientName.Fields.id,
+                                name)
+                )
+                .reduce((s1, s2) -> s1.and(s2)).orElse(null);
     }
 }

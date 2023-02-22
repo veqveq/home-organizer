@@ -1,12 +1,4 @@
-import {
-  Component,
-  ElementRef,
-  EventEmitter, HostListener,
-  Input,
-  OnInit,
-  Output,
-  ViewChild
-} from '@angular/core';
+import {Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, ViewChild} from '@angular/core';
 import {RecipeCompFilter} from "../../models/recipe-comp-filter";
 import {RecipeCompService} from "../../services/recipe-comp.service";
 import {map, tap} from "rxjs";
@@ -92,7 +84,7 @@ export class ItemFilterComponent implements OnInit {
   }
 
   doFilter() {
-    this.service.doFilter(this.filter, this.endpoint, 0)
+    this.service.doFilter<RecipeComp>(this.filter, this.endpoint, 0)
       .pipe(
         tap(resp => {
           if (!resp.last) {
@@ -107,7 +99,7 @@ export class ItemFilterComponent implements OnInit {
 
   doFilterNextPage() {
     if (this.page < this.totalPages - 1) {
-      this.service.doFilter(this.filter, this.endpoint, this.page)
+      this.service.doFilter<RecipeComp>(this.filter, this.endpoint, this.page)
         .pipe(
           tap(resp => {
             if (!resp.last) {

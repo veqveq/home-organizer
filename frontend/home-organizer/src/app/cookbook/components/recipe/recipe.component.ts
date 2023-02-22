@@ -2,7 +2,7 @@ import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {Recipe} from "../../models/recipe";
 import {Ingredient} from "../../models/ingredient";
 import {RecipeComp} from "../../models/recipe-comp";
-import {TSMap} from "typescript-map";
+import {GroupIngredientName} from "../../models/group-ingredient-name";
 
 @Component({
   selector: 'app-recipe',
@@ -10,7 +10,7 @@ import {TSMap} from "typescript-map";
 })
 export class RecipeComponent implements OnInit {
   @Input() recipe: Recipe
-  @Input() filteredIngredients: TSMap<string, RecipeComp[]>
+  @Input() filteredIngredients: Map<GroupIngredientName, RecipeComp[]>
   @Output() addKitchen = new EventEmitter()
   @Output() addType = new EventEmitter()
   @Output() addCategory = new EventEmitter()

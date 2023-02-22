@@ -1,6 +1,7 @@
 import {ValInterval} from "./val-interval";
 import {RecipeComp} from "./recipe-comp";
 import {TSMap} from "typescript-map";
+import {GroupIngredientName} from "./group-ingredient-name";
 
 export class RecipeFilter{
   title?: string;
@@ -14,5 +15,25 @@ export class RecipeFilter{
   typeIds: string[] = [];
   categoryIds: string[] = [];
   kitchenIds: string[] = [];
-  ingredients: TSMap<string,RecipeComp[]> = new TSMap<string, RecipeComp[]>();
+  ingredients: Map<GroupIngredientName,RecipeComp[]> = new Map<GroupIngredientName, RecipeComp[]>();
+
+  toJson(): any{
+    let ingredientIdsMap = new TSMap<string,string[]>()
+    this.ingredients.forEach((ingredients, group) =>
+      ingredientIdsMap.set(group.id,ingredients.map(ingredient => ingredient.id)))
+    return {
+      "title": this.title,
+      "kcal": this.kcal,
+      "proteins": this.proteins,
+      "fats": this.fats,
+      "carbons": this.carbons,
+      "portions": this.portions,
+      "cookTime": this.cookTime,
+      "rating": this.rating,
+      "typeIds": this.typeIds,
+      "categoryIds": this.categoryIds,
+      "kitchenIds": this.kitchenIds,
+      "ingredients": ingredientIdsMap
+    }
+  }
 }

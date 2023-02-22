@@ -14,5 +14,5 @@ public class IngredientNameDto {
     private String name;
 
     @Schema(description = "Идентификатор группы ингрединтов")
-    private UUID groupId;
+    private IngredientNameDto group;
 }

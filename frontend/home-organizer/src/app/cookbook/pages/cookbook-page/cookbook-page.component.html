@@ -59,9 +59,17 @@
   <!--Список рецептов-->
   <div
     class="flex-grow max-h-[1000px] scrollbar">
+    <app-loader
+      [size]="8"
+      [loaderPosition]="loaderPosition.TOP"
+      [darkBg]="false"
+      [visible]="loader">
+      <span>Загрузка рецептов</span>
+    </app-loader>
     <ul
       #page
       (scroll)="doScroll(page)"
+      [ngClass]="loader?'hidden':''"
       class="scrollbar max-h-[1000px]">
       <li *ngFor="let rec of recipes">
         <app-recipe [recipe]="rec"

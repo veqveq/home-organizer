@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpErrorResponse, HttpParams} from "@angular/common/http";
 import {ErrorService} from "../../core/services/error.service";
-import {catchError, map, Observable, retry, throwError} from "rxjs";
+import {catchError, Observable, retry, throwError} from "rxjs";
 import {Page} from "../../core/models/page";
 import {RecipeFilter} from "../models/recipe-filter";
 import {Recipe} from "../models/recipe";
@@ -20,8 +20,7 @@ export class RecipeService {
   }
 
   filter(filter: RecipeFilter, sort: string, page: number): Observable<Page<Recipe>> {
-    console.log(filter)
-    return this.http.post<Page<Recipe>>(this.ROOT_API + '/filter', filter, {
+    return this.http.post<Page<Recipe>>(this.ROOT_API + '/filter', filter.toJson(), {
       params: new HttpParams({
         fromObject: {
           sort: sort,

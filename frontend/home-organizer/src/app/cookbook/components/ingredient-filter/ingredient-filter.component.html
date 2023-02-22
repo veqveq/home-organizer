@@ -50,19 +50,25 @@
     <!--Список выбранных айтемов-->
     <div class="relative">
       <ul class="flex flex-wrap">
-        <li *ngFor="let entry of pickedValues.values()"
+        <li *ngFor="let entry of pickedValues | keyvalue"
             class="flex flex-wrap">
-          <p
-            *ngFor="let val of entry"
-            class="ml-0.5 mt-0.5 px-4 py-1 bg-gray-300 text-white border-0 rounded-md flex-auto flex justify-between text-sm"
-          >
-            <span>{{val.name}}</span>
-            <button
-              (click)="returnIngredient(val)"
-              class=" text-sm text-white ml-0.5"
-            >x
-            </button>
-          </p>
+          <app-picked-group
+            [group]="entry.key"
+            [elements]="entry.value"
+            (groupClosed)="returnGroup($event)"
+            (elementClosed)="returnIngredient($event)"
+          ></app-picked-group>
+<!--          <p-->
+<!--            *ngFor="let val of entry.value"-->
+<!--            class="ml-0.5 mt-0.5 px-4 py-1 bg-gray-300 text-white border-0 rounded-md flex-auto flex justify-between text-sm"-->
+<!--          >-->
+<!--            <span>{{val.name}}</span>-->
+<!--            <button-->
+<!--              (click)="returnIngredient(val)"-->
+<!--              class=" text-sm text-white ml-0.5"-->
+<!--            >x-->
+<!--            </button>-->
+<!--          </p>-->
         </li>
       </ul>
       <!--Выпадающий список-->
@@ -103,7 +109,7 @@
               <ul>
                 <li
                   class="bg-amber-200 pl-10 py-1 font-normal hover:font-bold hover:bg-amber-400"
-                  (click)="pickIngredient(ingredient,group); getNotPickedFromGroupCount(group) == 0?dropdownTab.nextDropdown():''"
+                  (click)="pickIngredient(ingredient); getNotPickedFromGroupCount(group) == 0?dropdownTab.nextDropdown():''"
                   [ngClass]="ingredient.hidden?'hidden':''"
                   *ngFor="let ingredient of group.childIngredientNames"
                 >

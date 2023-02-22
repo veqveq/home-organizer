@@ -10,7 +10,7 @@ import ru.veqveq.cookbook.model.entity.IngredientName;
 
 @Mapper
 public interface IngredientMapper {
-    @Mapping(target = "groupId", source = "groupIngredientName.id")
+    @Mapping(target = "group", source = "groupIngredientName")
     IngredientNameDto toNameDto(IngredientName source);
 
     GroupIngredientNameDto toGroupNameDto(IngredientName source);

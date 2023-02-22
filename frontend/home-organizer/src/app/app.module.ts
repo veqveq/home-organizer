@@ -10,20 +10,26 @@ import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {DictionaryFilterPipe} from './dictionary/pipes/dictionary-filter.pipe';
 import {ModalComponent} from "./core/components/modal/modal.component";
 import {DictionaryEditorComponent} from './dictionary/components/dictionary-editor/dictionary-editor.component';
-import {CreateDictionaryFieldComponent} from './dictionary/components/dictionary-field-editor/dictionary-field-editor.component';
+import {
+  CreateDictionaryFieldComponent
+} from './dictionary/components/dictionary-field-editor/dictionary-field-editor.component';
 import {DictionaryRegisterComponent} from './dictionary/pages/dictionary-register/dictionary-register.component';
 import {RefDirective} from "./core/directives/ref.directive";
 import {DictionaryPageComponent} from './dictionary/pages/dictionary-page/dictionary-page.component';
-import { DictionaryItemEditorComponent } from './dictionary/components/dictionary-item-editor/dictionary-item-editor.component';
-import { PaginationComponent } from './core/components/pagination/pagination.component';
-import { LoaderComponent } from './core/components/loader/loader.component';
-import { CookbookPageComponent } from './cookbook/pages/cookbook-page/cookbook-page.component';
-import { RecipeComponent } from './cookbook/components/recipe/recipe.component';
-import { Ng5SliderModule } from 'ng5-slider';
-import { SliderFilterComponent } from './cookbook/components/slider-filter/slider-filter.component';
-import { ItemFilterComponent } from './cookbook/components/item-filter/item-filter.component';
-import { DropdownTabComponent } from './core/components/dropdown-tab/dropdown-tab.component';
-import { IngredientFilterComponent } from './cookbook/components/ingredient-filter/ingredient-filter.component';
+import {
+  DictionaryItemEditorComponent
+} from './dictionary/components/dictionary-item-editor/dictionary-item-editor.component';
+import {PaginationComponent} from './core/components/pagination/pagination.component';
+import {LoaderComponent} from './core/components/loader/loader.component';
+import {CookbookPageComponent} from './cookbook/pages/cookbook-page/cookbook-page.component';
+import {RecipeComponent} from './cookbook/components/recipe/recipe.component';
+import {Ng5SliderModule} from 'ng5-slider';
+import {SliderFilterComponent} from './cookbook/components/slider-filter/slider-filter.component';
+import {ItemFilterComponent} from './cookbook/components/item-filter/item-filter.component';
+import {DropdownTabComponent} from './core/components/dropdown-tab/dropdown-tab.component';
+import {IngredientFilterComponent} from './cookbook/components/ingredient-filter/ingredient-filter.component';
+import {CloseableGroupComponent} from './core/components/closeable-group/closeable-group.component';
+import {PickedGroupComponent} from './cookbook/components/ingredient-filter/picked-group.component';
 
 @NgModule({
   declarations: [
@@ -46,6 +52,8 @@ import { IngredientFilterComponent } from './cookbook/components/ingredient-filt
     ItemFilterComponent,
     DropdownTabComponent,
     IngredientFilterComponent,
+    CloseableGroupComponent,
+    PickedGroupComponent,
   ],
   imports: [
     BrowserModule,

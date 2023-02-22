@@ -1,12 +1,13 @@
 import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {Recipe} from "../../models/recipe";
 import {RecipeFilter} from "../../models/recipe-filter";
-import {ValInterval} from "../../models/val-interval";
 import {RecipeService} from "../../services/recipe.service";
 import {SliderFilterComponent} from "../../components/slider-filter/slider-filter.component";
 import {ItemFilterComponent} from "../../components/item-filter/item-filter.component";
 import {DropdownTabComponent} from "../../../core/components/dropdown-tab/dropdown-tab.component";
 import {map, tap} from "rxjs";
+import {LoaderPosition} from "../../../core/components/loader/loader-position-enum";
+import {IngredientFilterComponent} from "../../components/ingredient-filter/ingredient-filter.component";
 
 @Component({
   selector: 'app-cookbook-page',
@@ -17,7 +18,7 @@ export class CookbookPageComponent implements OnInit {
   @ViewChild('typeOptions') typeOptions: ItemFilterComponent
   @ViewChild('categoryOptions') categoryOptions: ItemFilterComponent
   @ViewChild('kitchenOptions') kitchenOptions: ItemFilterComponent
-  @ViewChild('ingredientOptions') ingredientOptions: ItemFilterComponent
+  @ViewChild('ingredientOptions') ingredientOptions: IngredientFilterComponent
   @ViewChild('additionalOptions') additionalOptions: DropdownTabComponent
   @ViewChild('energyOptions') energyOptions: DropdownTabComponent
   @ViewChild('sortParam') sortParam: ElementRef
@@ -28,6 +29,8 @@ export class CookbookPageComponent implements OnInit {
   totalPages: number
   totalElements: number
   direction: string = 'DESC'
+  loader: boolean = false
+  public loaderPosition = LoaderPosition
 
   recipes: Recipe[] = []
 
@@ -54,6 +57,7 @@ export class CookbookPageComponent implements OnInit {
   }
 
   doFilter() {
+    this.loader = true
     this.service.filter(this.filter, this.getSort(), 0).pipe(
       tap(page => {
         this.page = page.number + 1
@@ -62,7 +66,10 @@ export class CookbookPageComponent implements OnInit {
         this.recipeList.nativeElement.scrollTop = 0
       }),
       map((page) => page.content)
-    ).subscribe((content) => this.recipes = content)
+    ).subscribe((content) => {
+      this.recipes = content
+      this.loader = false
+    })
   }
 
   changeDirection() {
@@ -88,6 +95,7 @@ export class CookbookPageComponent implements OnInit {
 
   doFilterNextPage() {
     if (this.page < this.totalPages - 1) {
+      this.loader = true
       this.service.filter(this.filter, this.getSort(), this.page)
         .pipe(
           tap(resp => {
@@ -97,7 +105,10 @@ export class CookbookPageComponent implements OnInit {
           }),
           map((resp) => resp.content)
         )
-        .subscribe(items => this.recipes.push(...items))
+        .subscribe(items => {
+          this.recipes.push(...items)
+          this.loader = false
+        })
     }
   }
 }
