@@ -4,6 +4,7 @@ import {ErrorService} from "../../core/services/error.service";
 import {catchError, Observable, retry, throwError} from "rxjs";
 import {Page} from "../../core/models/page";
 import {RecipeCompFilter} from "../models/recipe-comp-filter";
+import {Recipe} from "../models/recipe";
 
 @Injectable({
   providedIn: 'root'
@@ -15,6 +16,20 @@ export class RecipeCompService {
     private http: HttpClient,
     private errorService: ErrorService
   ) {
+  }
+
+  getPage(sort: string, page: number): Observable<Page<Recipe>>{
+    return this.http.get<Page<Recipe>>(this.ROOT_API + '/all', {
+      params: new HttpParams({
+        fromObject: {
+          sort: sort,
+          page: page ? page : '',
+        },
+      })
+    }).pipe(
+      retry(2),
+      catchError(this.handleError.bind(this))
+    )
   }
 
   doFilter<T>(filter: RecipeCompFilter, endpoint: string, page: number): Observable<Page<T>> {

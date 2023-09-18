@@ -16,9 +16,9 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>auth</module>
-        <module>backend</module>
-        <module>cookbook</module>
+        <module>ho-auth</module>
+        <module>ho-tables</module>
+        <module>ho-cookbook</module>
     </modules>
 
     <properties>
