@@ -9,12 +9,11 @@ import ru.veqveq.tables.dto.item.input.InputDictionaryItemDto;
 import ru.veqveq.tables.model.entity.Dictionary;
 import ru.veqveq.tables.model.entity.DictionaryField;
 import ru.veqveq.tables.model.enumerated.DictionaryFieldType;
-import ru.veqveq.tables.service.DictionaryItemService;
 import ru.veqveq.tables.service.DictionaryService;
 import ru.veqveq.tables.service.ElasticsearchService;
 import ru.veqveq.tables.util.ElasticUtils;
 
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidatorContext;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Map;
@@ -26,7 +25,6 @@ import java.util.stream.Collectors;
 @Setter(onMethod_ = @Autowired)
 public abstract class AbstractItemValidator<T extends InputDictionaryItemDto> {
     protected DictionaryService dictionaryService;
-    private DictionaryItemService itemService;
     protected ElasticsearchService esService;
 
     protected abstract boolean isUniqueField(T item, Dictionary dictionary, String fieldName, Object fieldValue);

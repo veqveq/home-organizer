@@ -6,7 +6,7 @@ import lombok.EqualsAndHashCode;
 import ru.veqveq.tables.dto.item.input.InputDictionaryItemDto;
 import ru.veqveq.tables.validation.item.DictionaryItemValid;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 
 @Data

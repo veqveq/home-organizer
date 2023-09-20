@@ -2,8 +2,9 @@ package ru.veqveq.tables.model.enumerated;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.joda.time.Instant;
 
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.function.Function;
 
 @Getter
@@ -22,7 +23,7 @@ public enum DictionaryFieldType {
             throw new RuntimeException();
         }
     }),
-    Date("Дата", Instant::parse);
+    Date("Дата", LocalDate::parse);
     private final String name;
     private final Function<String, ?> mappingFunction;
 }

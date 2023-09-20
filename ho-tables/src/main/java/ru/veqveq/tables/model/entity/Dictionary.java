@@ -7,7 +7,7 @@ import lombok.ToString;
 import lombok.experimental.FieldNameConstants;
 import ru.veqveq.tables.model.AuditorAwareEntity;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.*;
 
 @Entity

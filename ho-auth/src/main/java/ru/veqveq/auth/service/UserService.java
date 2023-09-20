@@ -13,7 +13,7 @@ import ru.veqveq.auth.model.UserDefaultRole;
 import ru.veqveq.auth.repo.UserRepository;
 
 import javax.annotation.PostConstruct;
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 

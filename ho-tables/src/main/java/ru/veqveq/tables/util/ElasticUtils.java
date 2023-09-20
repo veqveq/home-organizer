@@ -1,11 +1,16 @@
 package ru.veqveq.tables.util;
 
+import co.elastic.clients.elasticsearch._types.FieldValue;
+import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
+import co.elastic.clients.elasticsearch.core.search.*;
+import co.elastic.clients.json.JsonData;
+import jakarta.json.JsonString;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.data.elasticsearch.core.SearchHit;
+import org.springframework.data.elasticsearch.core.query.HighlightQuery;
 import org.springframework.util.CollectionUtils;
 import ru.veqveq.tables.dto.item.OutputDictionaryItemDto;
 import ru.veqveq.tables.model.DictionaryItemFilter;
@@ -22,61 +27,69 @@ public class ElasticUtils {
     public static final String RAW_INDEX_FIELD_PREFIX = "raw";
 
 
-    public void addCommonFilters(BoolQueryBuilder builder, Dictionary dictionary, String commonFilter) {
+    public void addCommonFilters(BoolQuery.Builder builder, Dictionary dictionary, String commonFilter) {
         String[] fieldNames = getTextFields(dictionary, UUID::toString).toArray(new String[0]);
-        BoolQueryBuilder commonBuilder = new BoolQueryBuilder();
-        if (StringUtils.isNotBlank(commonFilter)) {
-            Set<String> tokens = Set.of(commonFilter.trim().replaceAll("\\s+", " ").split("\\s"));
-            for (String token : tokens) {
+        BoolQuery commonQuery = BoolQuery.of(common -> {
+            if (StringUtils.isNotBlank(commonFilter)) {
+                Set<String> tokens = Set.of(commonFilter.trim().replaceAll("\\s+", " ").split("\\s"));
                 for (String fieldName : fieldNames) {
-                    BoolQueryBuilder fieldBuilder = new BoolQueryBuilder();
-                    fieldBuilder.must(QueryBuilders.matchPhrasePrefixQuery(fieldName, token));
-                    fieldBuilder.must(QueryBuilders.matchPhrasePrefixQuery(fieldName, commonFilter));
-                    commonBuilder.should(fieldBuilder);
+                    BoolQuery.Builder bool = new BoolQuery.Builder();
+                    for (String token : tokens) {
+                        bool.must(QueryBuilders.matchPhrasePrefix(q -> q.field(fieldName).query(token)));
+                    }
+                    common.should(bool.build()._toQuery());
                 }
             }
-            builder.must(commonBuilder);
-        }
+            return common;
+        });
+        builder.must(commonQuery._toQuery());
     }
 
-    public void addFieldFilters(BoolQueryBuilder builder, Dictionary dictionary, Map<String, Object> filters) {
+    public void addFieldFilters(BoolQuery.Builder builder, Dictionary dictionary, Map<String, Object> filters) {
         if (!CollectionUtils.isEmpty(filters)) {
             List<String> textFields = getTextFields(dictionary, UUID::toString);
             List<String> notTextFields = getNotTextFields(dictionary, UUID::toString);
             filters.forEach((key, value) -> {
                 if (textFields.contains(key)) {
-                    builder.must(QueryBuilders.matchPhrasePrefixQuery(key, value));
+                    builder.must(QueryBuilders.matchPhrasePrefix(q -> q.field(key).query(value.toString())));
                 } else if (notTextFields.contains(key)) {
-                    builder.must(QueryBuilders.matchQuery(key, value));
+                    builder.must(QueryBuilders.match(q -> q.field(key).query(FieldValue.of(JsonData.of(value)))));
                 }
             });
         }
     }
 
-    public HighlightBuilder addHighlight(Dictionary dictionary, DictionaryItemFilter filter) {
-        HighlightBuilder builder = new HighlightBuilder();
-        builder.requireFieldMatch(false);
-        builder.preTags("<b class= \"text-red-600\">");
-        builder.postTags("</b>");
-        builder.highlighterType("fvh");
-        builder.boundaryScannerType(HighlightBuilder.BoundaryScannerType.CHARS);
-        Set<HighlightBuilder.Field> highlightFields = new HashSet<>();
+    public Highlight addHighlight(Dictionary dictionary, DictionaryItemFilter filter) {
+        List<Pair<String, HighlightField>> pairs = new ArrayList<>();
         if (StringUtils.isNotBlank(filter.getCommonFilter())) {
-            highlightFields.addAll(getTextFields(dictionary, val -> new HighlightBuilder.Field(val.toString())));
+            pairs = getTextFields(dictionary, val -> Pair.of(val.toString(), HighlightField.of(fld -> fld.matchedFields(val.toString()))));
         }
         if (!CollectionUtils.isEmpty(filter.getFieldFilters())) {
-            highlightFields.addAll(filter.getFieldFilters().keySet().stream().map(HighlightBuilder.Field::new).collect(Collectors.toList()));
+            pairs.addAll(
+                    filter.getFieldFilters()
+                            .keySet()
+                            .stream()
+                            .map(fldName -> Pair.of(fldName, HighlightField.of(fld -> fld.matchedFields(fldName))))
+                            .toList());
         }
-        builder.fields().addAll(highlightFields);
-        return builder;
+
+        Map<String, HighlightField> highlightFields = pairs.stream().collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
+        return Highlight.of(h -> h
+                .requireFieldMatch(false)
+                .preTags(List.of("<b class= \"text-red-600\">"))
+                .postTags(List.of("</b>"))
+                .type(HighlighterType.FastVector)
+                .boundaryScanner(BoundaryScanner.Chars)
+                .fields(highlightFields)
+        );
     }
 
-    public OutputDictionaryItemDto getHitValue(SearchHit searchHit) {
+    public OutputDictionaryItemDto getHitValue(Hit<Map<String, Object>> hit) {
         OutputDictionaryItemDto dto = new OutputDictionaryItemDto();
-        dto.setId(UUID.fromString(searchHit.getId()));
-        dto.setFieldValues(searchHit.getSourceAsMap());
-        if (!searchHit.getHighlightFields().isEmpty()) {
-            searchHit.getHighlightFields().forEach((k, v) -> dto.getFieldValues().put(k, StringUtils.join(v.fragments())));
+        dto.setId(UUID.fromString(hit.id()));
+        dto.setFieldValues(hit.source());
+        if (!hit.highlight().isEmpty()) {
+            hit.highlight().forEach((k, v) -> dto.getFieldValues().put(k, StringUtils.join(v.toArray())));
         }
         return dto;
     }

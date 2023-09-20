@@ -35,7 +35,7 @@ public class DictionaryServiceImpl implements DictionaryService {
         UUID esIndexRequest = UUID.randomUUID();
         Dictionary dictionary = dictionaryRepo.save(dictionaryMapper.toEntity(dto, esIndexRequest));
         esService.initIndex(dictionary);
-        log.info("Saving dictionary {} successful", dto.toString());
+        log.info("Saving dictionary {} successful", dto);
         return dictionary.getId();
     }
 

@@ -1,18 +1,14 @@
 package ru.veqveq.tables.service.impl;
 
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.Refresh;
+import co.elastic.clients.elasticsearch._types.SortOptions;
+import co.elastic.clients.elasticsearch._types.SortOrder;
+import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
+import co.elastic.clients.elasticsearch.core.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.action.delete.DeleteRequest;
-import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.action.support.WriteRequest;
-import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -34,13 +30,11 @@ import ru.veqveq.tables.service.DictionaryService;
 import ru.veqveq.tables.service.ElasticsearchService;
 import ru.veqveq.tables.util.ElasticUtils;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
+
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import java.lang.reflect.Type;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -49,7 +43,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class DictionaryItemServiceImpl implements DictionaryItemService {
     private final DictionaryService dictionaryService;
-    private final RestHighLevelClient client;
+    private final ElasticsearchClient client;
     private final DictionaryItemMapper mapper;
     private final ElasticsearchService esService;
 
@@ -58,18 +52,19 @@ public class DictionaryItemServiceImpl implements DictionaryItemService {
         log.info("Saving item {} has started", dto.toString());
         try {
             Dictionary dictionary = dictionaryService.getById(dto.getDictionaryId());
-            IndexRequest request = new IndexRequest(dictionary.getEsIndexName());
             UUID id = UUID.randomUUID();
-            request.source(dto.getFieldValues());
-            request.id(id.toString());
-            request.setRefreshPolicy(WriteRequest.RefreshPolicy.WAIT_UNTIL);
-            client.index(request, RequestOptions.DEFAULT);
-            log.info("Saving item {} successful", dto.toString());
+            client.index(IndexRequest.of(r -> r
+                    .index(dictionary.getEsIndexName())
+                    .id(id.toString())
+                    .refresh(Refresh.True)
+                    .document(dto.getFieldValues())
+            ));
+            log.info("Saving item {} successful", dto);
             return id;
         } catch (IOException e) {
-            log.error("Saving item {} failed", dto.toString());
+            log.error("Saving item {} failed", dto);
             throw new HoException(String.format("Ошибка при сохранении записи справочника [%s]: %s",
-                    dto.toString(), e.getMessage()));
+                    dto, e.getMessage()));
         }
     }
 
@@ -79,35 +74,36 @@ public class DictionaryItemServiceImpl implements DictionaryItemService {
         Dictionary dictionary = dictionaryService.getById(dictId);
         List<String> textFields = ElasticUtils.getTextFields(dictionary, UUID::toString);
         try {
-            SearchRequest searchRequest = new SearchRequest(dictionary.getEsIndexName());
-            SearchSourceBuilder builder = new SearchSourceBuilder();
+            SearchRequest.Builder builder = new SearchRequest.Builder();
 
             if (Objects.nonNull(filter)) {
-                BoolQueryBuilder queryBuilder = new BoolQueryBuilder();
+                BoolQuery.Builder queryBuilder = new BoolQuery.Builder();
                 ElasticUtils.addCommonFilters(queryBuilder, dictionary, filter.getCommonFilter());
                 ElasticUtils.addFieldFilters(queryBuilder, dictionary, filter.getFieldFilters());
-                builder.query(queryBuilder);
-                builder.highlighter(ElasticUtils.addHighlight(dictionary, filter));
+                builder.query(queryBuilder.build()._toQuery());
+                builder.highlight(ElasticUtils.addHighlight(dictionary, filter));
             }
 
             builder.from(pageable.getPageNumber() * pageable.getPageSize());
             builder.size(pageable.getPageSize());
             pageable.getSort().stream()
                     .forEach(order -> {
-                        String sortProperty = order.getProperty();
-                        if (textFields.contains(sortProperty)) {
-                            sortProperty = StringUtils.joinWith(".",sortProperty, ElasticUtils.RAW_INDEX_FIELD_PREFIX);
-                        }
-                        builder.sort(sortProperty, SortOrder.valueOf(order.getDirection().name()));
+                        String sortProperty = textFields.contains(order.getProperty())
+                                ? StringUtils.joinWith(".", order.getProperty(), ElasticUtils.RAW_INDEX_FIELD_PREFIX)
+                                : order.getProperty();
+                        builder.sort(SortOptions.of(s -> s.field(
+                                fld -> fld.field(sortProperty).order(SortOrder.valueOf(StringUtils.capitalize(order.getDirection().name().toLowerCase()))))
+                        ));
                     });
-
-            searchRequest.source(builder);
-            SearchResponse response = client.search(searchRequest, RequestOptions.DEFAULT);
-            List<OutputDictionaryItemDto> items = Arrays.stream(response.getHits().getHits())
+            SearchResponse<Map<String, Object>> response = client.search(builder.build(), (Type) Map.class);
+            System.out.println(response);
+            List<OutputDictionaryItemDto> items = response.hits().hits()
+                    .stream()
                     .map(ElasticUtils::getHitValue)
-                    .collect(Collectors.toList());
+                    .toList();
             log.info("Elasticsearch filtering by criteria {} successful. Found {} items", filter, items.size());
-            return new PageImpl<>(items, pageable, response.getHits().getTotalHits().value);
+            long total = Objects.nonNull(response.hits().total()) ? response.hits().total().value() : 0;
+            return new PageImpl<>(items, pageable, total);
         } catch (IOException e) {
             log.error("Elasticsearch filtering failed: {}", e.getMessage());
             throw new HoException(String.format("Ошибка поиска Elasticsearch: %s", e.getMessage()));
@@ -119,17 +115,18 @@ public class DictionaryItemServiceImpl implements DictionaryItemService {
         log.info("Updating item {} has started", dto.toString());
         try {
             Dictionary dictionary = dictionaryService.getById(dto.getDictionaryId());
-            IndexRequest request = new IndexRequest(dictionary.getEsIndexName());
-            request.source(dto.getFieldValues());
-            request.id(dto.getId().toString());
-            request.setRefreshPolicy(WriteRequest.RefreshPolicy.WAIT_UNTIL);
-            client.index(request, RequestOptions.DEFAULT);
-            log.info("Updating item {} successful", dto.toString());
+            client.index(IndexRequest.of(req -> req
+                    .index(dictionary.getEsIndexName())
+                    .id(dto.getId().toString())
+                    .document(dto.getFieldValues())
+                    .refresh(Refresh.True)
+            ));
+            log.info("Updating item {} successful", dto);
             return mapper.toGetDto(dto);
         } catch (IOException e) {
-            log.error("Updating item {} failed", dto.toString());
+            log.error("Updating item {} failed", dto);
             throw new HoException(String.format("Ошибка при обновлении записи справочника [%s]: %s",
-                    dto.toString(), e.getMessage()));
+                    dto, e.getMessage()));
         }
     }
 
@@ -138,10 +135,11 @@ public class DictionaryItemServiceImpl implements DictionaryItemService {
         log.info("Deleting item {} from index {} has started", uuid, dictId);
         try {
             Dictionary dictionary = dictionaryService.getById(dictId);
-            DeleteRequest request = new DeleteRequest(dictionary.getEsIndexName());
-            request.id(uuid.toString());
-            request.setRefreshPolicy(WriteRequest.RefreshPolicy.WAIT_UNTIL);
-            client.delete(request, RequestOptions.DEFAULT);
+            client.delete(DeleteRequest.of(req -> req
+                    .index(dictionary.getEsIndexName())
+                    .id(uuid.toString())
+                    .refresh(Refresh.True)
+            ));
             log.info("Deleting item {} from index {} successful", uuid, dictId);
         } catch (IOException e) {
             log.info("Deleting item {} from index {} failed", uuid, dictId);
@@ -153,10 +151,14 @@ public class DictionaryItemServiceImpl implements DictionaryItemService {
     @Override
     public boolean checkUnique(UUID dictionaryId, UUID itemId, UUID fieldId, Object fieldValue) {
         Dictionary dictionary = dictionaryService.getById(dictionaryId);
-        DictionaryField field = dictionary.getFields().stream().filter(fld -> fld.getId().equals(fieldId)).findFirst().orElseThrow(() -> new HoNotFoundException(String.format("Поле с id: %s не найдено", fieldId)));
+        DictionaryField field = dictionary.getFields()
+                .stream()
+                .filter(fld -> fld.getId().equals(fieldId))
+                .findFirst()
+                .orElseThrow(() -> new HoNotFoundException(String.format("Поле с id: %s не найдено", fieldId)));
         String fieldName = fieldId.toString();
         if (field.getType() == DictionaryFieldType.Text) {
-            fieldName = StringUtils.joinWith(".",fieldName, ElasticUtils.RAW_INDEX_FIELD_PREFIX);
+            fieldName = StringUtils.joinWith(".", fieldName, ElasticUtils.RAW_INDEX_FIELD_PREFIX);
         }
         return esService.isUniqueFieldValue(dictionary.getEsIndexName(), itemId, fieldName, fieldValue);
     }

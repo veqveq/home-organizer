@@ -9,8 +9,8 @@ import ru.veqveq.tables.dto.item.input.impl.UpdateDictionaryItemDto;
 import ru.veqveq.tables.exception.HoException;
 import ru.veqveq.tables.validation.item.validators.AbstractItemValidator;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 import java.util.List;
 
 @Slf4j

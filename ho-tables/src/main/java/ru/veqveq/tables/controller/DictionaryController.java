@@ -15,7 +15,7 @@ import ru.veqveq.tables.mapper.DictionaryMapper;
 import ru.veqveq.tables.model.AuditorAwareEntity;
 import ru.veqveq.tables.service.DictionaryService;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.util.UUID;
 
 @Tag(name = "Контроллер справочников")

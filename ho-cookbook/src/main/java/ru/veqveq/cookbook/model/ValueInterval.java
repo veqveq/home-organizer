@@ -1,10 +1,9 @@
 package ru.veqveq.cookbook.model;
 
+import jakarta.persistence.criteria.*;
 import lombok.Getter;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Predicate;
+
 import java.util.Objects;
 
 @Getter

@@ -35,9 +35,9 @@ public class AuthService {
                     .authorization(loginRequest.getEmail(), loginRequest.getPassword())
                     .authorize();
             UUID userSub = UUID.fromString(TokenUtils.getFieldFromToken(response.getToken(), "sub").toString());
-            User user = userRepository.findByKcUuid(userSub)
+            User user = userRepository.findById(userSub)
                     .orElseThrow(() -> new HoAuthException(
-                            String.format("Не найдена информация о пользователе: %s", loginRequest.getUsername())));
+                            String.format("Не найдена информация о пользователе: %s", loginRequest.getEmail())));
             return credentialsMapper.toDto(response, user);
         } catch (HttpResponseException exception) {
             throw new HoAuthException("Ошибка авторизации! Проверьте email/пароль");

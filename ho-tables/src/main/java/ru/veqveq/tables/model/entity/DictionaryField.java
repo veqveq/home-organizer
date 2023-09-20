@@ -7,7 +7,7 @@ import lombok.ToString;
 import ru.veqveq.tables.model.AuditorAwareEntity;
 import ru.veqveq.tables.model.enumerated.DictionaryFieldType;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.UUID;
 
 @Entity

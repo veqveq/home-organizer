@@ -1,11 +1,11 @@
 package ru.veqveq.cookbook.model.entity;
 
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
 
-import javax.persistence.*;
 import java.util.List;
 import java.util.UUID;
 

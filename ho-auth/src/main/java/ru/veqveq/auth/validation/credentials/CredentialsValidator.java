@@ -6,8 +6,8 @@ import org.springframework.stereotype.Service;
 import ru.veqveq.auth.dto.LoginRequest;
 import ru.veqveq.auth.service.UserService;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 @Slf4j
 @Service

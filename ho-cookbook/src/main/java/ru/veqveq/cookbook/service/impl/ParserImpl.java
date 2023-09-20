@@ -1,5 +1,6 @@
 package ru.veqveq.cookbook.service.impl;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -16,7 +17,6 @@ import ru.veqveq.cookbook.repo.*;
 import ru.veqveq.cookbook.service.Parser;
 import ru.veqveq.cookbook.util.ParserUtils;
 
-import javax.transaction.Transactional;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;

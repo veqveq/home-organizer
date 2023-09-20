@@ -7,7 +7,7 @@ import ru.veqveq.tables.dto.item.input.impl.SaveDictionaryItemDto;
 import ru.veqveq.tables.dto.item.input.impl.UpdateDictionaryItemDto;
 import ru.veqveq.tables.model.DictionaryItemFilter;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.util.UUID;
 
 public interface DictionaryItemService {
